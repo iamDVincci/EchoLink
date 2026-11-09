@@ -11,7 +11,7 @@ permissions:
 jobs:
   build-ios:
     name: Build EchoLink iOS on macOS
-    runs-on: macos-14
+    runs-on: macos-latest
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4
