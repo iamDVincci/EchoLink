@@ -1,5 +1,8 @@
 # EchoLink v2.4 — Cross-Platform P2P Tactical Voice Intercom (Android & iOS)
 
+> 🌐 **Live Interactive Website & Documentation:** [**https://iamdvincci.github.io/EchoLink/**](https://iamdvincci.github.io/EchoLink/)  
+> 📲 **Direct iOS IPA:** [`EchoLink-iOS-Unsigned.ipa`](https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-iOS-Unsigned.ipa) | 🤖 **Direct Android APK:** [`EchoLink-Android-v2.4.0.apk`](https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-Android-v2.4.0.apk)
+
 **EchoLink** is a zero-server, ultra-low-latency Peer-to-Peer (P2P) voice intercom built natively for **Android (Kotlin / Jetpack Compose)** and **iOS (Swift / SwiftUI)** with 100% wire-protocol, cryptographic, DSP, and UI parity.
 
 ---
