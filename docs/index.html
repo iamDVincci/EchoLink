@@ -1,0 +1,705 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>EchoLink v2.4 // Tactical P2P Zero-Cloud Voice Intercom</title>
+  
+  <!-- Meta & OpenGraph -->
+  <meta name="description" content="Ultra-low-latency, zero-cloud peer-to-peer voice intercom engineered with ChaCha20-Poly1305 encryption, 5-stage studio vocal DSP, and wire parity across iOS and Android.">
+  <meta name="theme-color" content="#05080B">
+  <meta property="og:title" content="EchoLink // Zero-Cloud Tactical P2P Voice Intercom">
+  <meta property="og:description" content="Sub-12ms encrypted voice over local Wi-Fi & hotspot mesh. 100% wire-compatible iOS & Android apps.">
+  <meta property="og:type" content="website">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+  <!-- Typography: Space Grotesk & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Space+Grotesk:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <!-- Ambient Cyber Overlays -->
+  <div class="cyber-grid-overlay"></div>
+  <div class="ambient-radial-glow"></div>
+
+  <!-- ==========================================================================
+       NAVIGATION BAR
+       ========================================================================== -->
+  <nav class="navbar">
+    <div class="nav-container">
+      <a href="#" class="brand-logo">
+        <svg viewBox="0 0 64 64" fill="none">
+          <circle cx="32" cy="32" r="28" stroke="#00FF9D" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="4 4"/>
+          <circle cx="32" cy="32" r="18" stroke="#00FF9D" stroke-width="2" stroke-opacity="0.6"/>
+          <circle cx="32" cy="32" r="8" stroke="#00FF9D" stroke-width="2"/>
+          <circle cx="32" cy="32" r="3" fill="#00FF9D"/>
+          <path d="M32 32 L50 14 A 26 26 0 0 0 32 6 Z" fill="#00FF9D" fill-opacity="0.4"/>
+        </svg>
+        <span>ECHOLINK</span>
+        <span class="brand-badge">v2.4.0</span>
+      </a>
+
+      <ul class="nav-links">
+        <li><a href="#radar" class="nav-link">Radar Mesh</a></li>
+        <li><a href="#dsp" class="nav-link">Studio DSP Demo</a></li>
+        <li><a href="#simulator" class="nav-link">Device Simulator</a></li>
+        <li><a href="#protocol" class="nav-link">Wire Protocol</a></li>
+        <li><a href="#downloads" class="nav-link">Downloads</a></li>
+        <li><a href="#guides" class="nav-link">Installation</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <div class="tactical-tag">
+          <span class="dot"></span>
+          <span>P2P MESH // ACTIVE</span>
+        </div>
+        <a href="https://github.com/iamDVincci/EchoLink" target="_blank" rel="noopener" class="btn-tactical btn-secondary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor">
+            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z"/>
+          </svg>
+          <span>GITHUB</span>
+        </a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ==========================================================================
+       HERO SECTION
+       ========================================================================== -->
+  <section class="hero-section">
+    <div class="hero-grid">
+      
+      <!-- Left Column: Copy & CTAs -->
+      <div class="hero-content">
+        <div class="tactical-tag">
+          <span class="dot"></span>
+          <span>ZERO-CLOUD HARDWARE ACCELERATED MESH</span>
+        </div>
+
+        <h1 class="hero-title">
+          Instant Tactical Voice.<br>
+          <span class="text-gradient-emerald">Zero Cloud.</span><br>
+          <span class="text-gradient-cyan">Zero Latency.</span>
+        </h1>
+
+        <p class="hero-description">
+          A military-grade, wire-compatible Peer-to-Peer intercom engineered for Android & iOS. Built with ChaCha20-Poly1305 AEAD cryptography, 5-stage studio vocal DSP, adaptive noise gate silence suppression, and zero cellular dependency.
+        </p>
+
+        <!-- CTA Buttons -->
+        <div class="hero-cta-group">
+          <a href="https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-iOS-Unsigned.ipa" class="btn-tactical btn-primary">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.78 1.06-1.85.94-2.93-.93.04-2.07.63-2.73 1.4-.58.67-1.1 1.76-.96 2.82 1.04.08 2.11-.53 2.75-1.29z"/>
+            </svg>
+            <span>DOWNLOAD FOR iOS (.IPA)</span>
+          </a>
+
+          <a href="https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-Android-v2.4.0.apk" class="btn-tactical btn-cyan">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+              <path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m-11.046 0c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8 12 8s-3.5902.4116-5.1368.9497L4.8409 5.4467a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/>
+            </svg>
+            <span>DOWNLOAD ANDROID (.APK)</span>
+          </a>
+
+          <a href="#dsp" class="btn-tactical btn-secondary">
+            <span>TRY LIVE AUDIO DEMO</span>
+            <span>↓</span>
+          </a>
+        </div>
+
+        <!-- Hero Stats Strip -->
+        <div class="hero-stats-strip">
+          <div class="stat-item">
+            <div class="stat-value">&lt; 12<span class="stat-unit">ms</span></div>
+            <div class="stat-label">Local UDP Latency</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">0<span class="stat-unit">KB</span></div>
+            <div class="stat-label">Zero Cloud Servers</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">256<span class="stat-unit">bit</span></div>
+            <div class="stat-label">ChaCha20-Poly1305</div>
+          </div>
+          <div class="stat-item">
+            <div class="stat-value">100<span class="stat-unit">%</span></div>
+            <div class="stat-label">Wire Protocol Parity</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right Column: Interactive 60fps Radar Canvas -->
+      <div class="hero-radar-container" id="radar">
+        <canvas id="heroRadarCanvas" class="radar-canvas"></canvas>
+        <div class="radar-hud-telemetry">
+          <span>FREQ: <strong>51111 UDP</strong></span>
+          <span>RANGE: <strong>100m</strong></span>
+          <span>BEARING: <strong id="hudBearingVal">074°</strong></span>
+          <span>ENC: <strong>AEAD</strong></span>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INTERACTIVE LIVE AUDIO DSP STUDIO SECTION
+       ========================================================================== -->
+  <section class="section-wrapper" id="dsp">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>STUDIO ACOUSTICS ENGINE</span>
+      </div>
+      <h2 class="section-title">Hear The DSP In Real-Time</h2>
+      <p class="section-subtitle">
+        Eliminate earbud white noise, combat Bluetooth DAC hiss, and sharpen speech clarity. Test EchoLink's 5-stage real-time DSP pipeline directly in your browser.
+      </p>
+    </div>
+
+    <div class="dsp-studio-card tactical-frame">
+      <div class="dsp-grid">
+        
+        <!-- Visualizers Column -->
+        <div class="dsp-visualizers">
+          <!-- Oscilloscope -->
+          <div class="dsp-canvas-box">
+            <div class="dsp-canvas-header">
+              <span>TIME-DOMAIN OSCILLOSCOPE (16 kHz PCM)</span>
+              <div class="status-indicator">
+                <span class="dot"></span>
+                <span>REAL-TIME STREAM</span>
+              </div>
+            </div>
+            <canvas id="canvasOscilloscope" class="canvas-oscilloscope"></canvas>
+          </div>
+
+          <!-- FFT Spectrum -->
+          <div class="dsp-canvas-box">
+            <div class="dsp-canvas-header">
+              <span>FAST FOURIER SPECTRUM (0 – 8 kHz TACTICAL BAND)</span>
+              <span style="color:#00e5ff;">RBJ BIQUAD PEAK: 2.8 kHz</span>
+            </div>
+            <canvas id="canvasSpectrum" class="canvas-spectrum"></canvas>
+          </div>
+        </div>
+
+        <!-- Controls Column -->
+        <div class="dsp-controls-panel">
+          
+          <div class="dsp-trigger-box">
+            <div>
+              <div style="font-weight:700; font-size:1.05rem;">Web Audio Generator</div>
+              <div style="font-size:0.78rem; color:var(--text-secondary);">Synthesizes speech harmonics + earbud hiss</div>
+            </div>
+            <button id="dspTogglePlayBtn" class="btn-tactical btn-primary audio-btn-large">
+              ▶ START AUDIO DEMO
+            </button>
+          </div>
+
+          <!-- Filter Switches -->
+          <div class="toggle-switch-group">
+            
+            <!-- Noise Gate -->
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <div class="toggle-title">Adaptive Noise Gate (-46 dBFS)</div>
+                <div class="toggle-desc">Cuts white noise floor & DAC hiss completely between spoken words (DTX).</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="dspGateToggle" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+
+            <!-- Vocal Presence Boost -->
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <div class="toggle-title">Vocal Presence Boost (+6.5 dB)</div>
+                <div class="toggle-desc">2.8 kHz RBJ biquad peaking filter boosts consonant intelligibility.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="dspVocalToggle" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+
+            <!-- Bandpass 120Hz - 6.5kHz -->
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <div class="toggle-title">120 Hz HPF & 6.5 kHz LPF</div>
+                <div class="toggle-desc">Strips mic handling thumps, sub-bass rumble, and high-frequency aliasing.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="dspBandpassToggle" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+
+            <!-- Haas 3D Spatial Audio -->
+            <div class="toggle-item">
+              <div class="toggle-info">
+                <div class="toggle-title">Haas 3D Spatial Stereo (0.75 ms)</div>
+                <div class="toggle-desc">Binaural time-difference delay widens soundstage for fatigue-free listening.</div>
+              </div>
+              <label class="switch">
+                <input type="checkbox" id="dspSpatialToggle" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+
+          </div>
+
+          <!-- Noise Injection Level Slider -->
+          <div class="slider-control-group">
+            <div class="slider-labels">
+              <span>SIMULATED AMBIENT / WHITE NOISE</span>
+              <span id="dspNoiseVal" style="color:var(--neon-cyan);">45%</span>
+            </div>
+            <input type="range" id="dspNoiseSlider" class="tactical-range" min="0" max="1" step="0.05" value="0.45">
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INTERACTIVE DEVICE SIMULATOR SECTION
+       ========================================================================== -->
+  <section class="section-wrapper" id="simulator">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>INTERACTIVE APP DEMO</span>
+      </div>
+      <h2 class="section-title">Test The UI On Device</h2>
+      <p class="section-subtitle">
+        Switch between the native iOS (SwiftUI) and Android (Jetpack Compose) viewports. Press the PTT button, switch Host routing modes, or manage peer history.
+      </p>
+    </div>
+
+    <div class="simulator-container">
+      
+      <!-- Interactive Phone Mockup -->
+      <div class="phone-viewport-container">
+        <div class="phone-mockup-frame" id="phoneMockup">
+          <div class="phone-island-notch" id="phoneNotch"></div>
+          <div class="phone-screen-content" id="phoneScreenContent">
+            <!-- Screen Content Injected via device-simulator.js -->
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulator Controls & Feature Tabs -->
+      <div class="simulator-feature-details">
+        
+        <div class="device-switcher-nav">
+          <button class="device-tab-btn active" id="tabDeviceIos">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.78 1.06-1.85.94-2.93-.93.04-2.07.63-2.73 1.4-.58.67-1.1 1.76-.96 2.82 1.04.08 2.11-.53 2.75-1.29z"/></svg>
+            <span>iPhone 15 Pro (SwiftUI)</span>
+          </button>
+          <button class="device-tab-btn" id="tabDeviceAndroid">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m-11.046 0c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8 12 8s-3.5902.4116-5.1368.9497L4.8409 5.4467a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+            <span>Galaxy S23 Ultra (Compose)</span>
+          </button>
+        </div>
+
+        <!-- Screen Selectors -->
+        <div class="sim-feature-card active" data-screen="intercom">
+          <div style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-emerald);">SCREEN 01</div>
+          <h3 style="font-size:1.1rem; margin:0.25rem 0;">Tactile Push-To-Talk (PTT) Intercom</h3>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">Click & hold the large circular PTT button in the phone mockup to test live microphone transmission and VU visualizer animation.</p>
+        </div>
+
+        <div class="sim-feature-card" data-screen="radar">
+          <div style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-cyan);">SCREEN 02</div>
+          <h3 style="font-size:1.1rem; margin:0.25rem 0;">Sonar Radar Mesh Discovery</h3>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">Zero-configuration UDP beacon scanner continuously discovers Android & iOS devices within Wi-Fi and hotspot range.</p>
+        </div>
+
+        <div class="sim-feature-card" data-screen="routing">
+          <div style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-amber);">SCREEN 03</div>
+          <h3 style="font-size:1.1rem; margin:0.25rem 0;">Host Room Multi-Peer Routing</h3>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">Switch between "Talk to All (Broadcast)" to address the entire group simultaneously, or talk privately 1-on-1 with an individual peer.</p>
+        </div>
+
+        <div class="sim-feature-card" data-screen="history">
+          <div style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-crimson);">SCREEN 04</div>
+          <h3 style="font-size:1.1rem; margin:0.25rem 0;">Device History & Custom Renaming</h3>
+          <p style="font-size:0.88rem; color:var(--text-secondary);">Rename connected peers with custom callsigns (✏️), delete individual saved nodes (×), or clear your entire connection history.</p>
+        </div>
+
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       WIRE PROTOCOL & PACKET INSPECTOR SECTION
+       ========================================================================== -->
+  <section class="section-wrapper" id="protocol">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>SPECIFICATION BLUEPRINT</span>
+      </div>
+      <h2 class="section-title">Zero-Cloud Wire Architecture</h2>
+      <p class="section-subtitle">
+        Every datagram on UDP port 51111 adheres to the EchoLink binary wire protocol. Hover over each byte block below to inspect its cryptographic and low-overhead structure.
+      </p>
+    </div>
+
+    <div class="packet-inspector-container tactical-frame">
+      <div style="display:flex; justify-content:space-between; align-items:center;">
+        <span style="font-family:var(--text-mono); font-size:0.85rem; color:var(--neon-emerald);">
+          UDP VOICE DATAGRAM // 21-BYTE AG HEADER + PAYLOAD + 16-BYTE POLY1305
+        </span>
+        <span class="tactical-tag">HOVER BYTES TO INSPECT</span>
+      </div>
+
+      <!-- Byte Strips -->
+      <div class="packet-bytes-strip">
+        <div class="byte-block active" data-field="magic">
+          <span class="byte-hex">0x41 0x47</span>
+          <span class="byte-name">Magic (AG)</span>
+        </div>
+        <div class="byte-block" data-field="version">
+          <span class="byte-hex">0x02</span>
+          <span class="byte-name">Version</span>
+        </div>
+        <div class="byte-block" data-field="type">
+          <span class="byte-hex">0x01</span>
+          <span class="byte-name">Type</span>
+        </div>
+        <div class="byte-block" data-field="seq">
+          <span class="byte-hex">[4 Bytes]</span>
+          <span class="byte-name">SeqNum</span>
+        </div>
+        <div class="byte-block" data-field="timestamp">
+          <span class="byte-hex">[8 Bytes]</span>
+          <span class="byte-name">Timestamp</span>
+        </div>
+        <div class="byte-block" data-field="length">
+          <span class="byte-hex">[2 Bytes]</span>
+          <span class="byte-name">Length</span>
+        </div>
+        <div class="byte-block" data-field="payload">
+          <span class="byte-hex">[640 Bytes]</span>
+          <span class="byte-name">Voice PCM</span>
+        </div>
+        <div class="byte-block" data-field="tag">
+          <span class="byte-hex">[16 Bytes]</span>
+          <span class="byte-name">Poly1305 Tag</span>
+        </div>
+      </div>
+
+      <!-- Interactive Detail Box -->
+      <div class="packet-detail-box">
+        <div class="packet-detail-title" id="packetDetailTitle">MAGIC BYTES // 0x41 0x47 ("AG")</div>
+        <div class="packet-detail-body" id="packetDetailBody">
+          2-byte header identifier (0x4147). Validates that incoming UDP datagrams on port 51111 belong strictly to the EchoLink protocol, immediately discarding stray network packets without decrypting.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       FEATURE COMPARISON MATRIX
+       ========================================================================== -->
+  <section class="section-wrapper">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>BENCHMARKS & COMPARISONS</span>
+      </div>
+      <h2 class="section-title">Why EchoLink Beats The Cloud</h2>
+      <p class="section-subtitle">
+        Compare EchoLink against conventional voice channels, cellular push-to-talk apps, and handheld radios.
+      </p>
+    </div>
+
+    <div class="matrix-table-container">
+      <table class="tactical-table">
+        <thead>
+          <tr>
+            <th>Feature Matrix</th>
+            <th class="highlight-col" style="color:var(--neon-emerald);">EchoLink v2.4 (P2P)</th>
+            <th>Discord / Cell Walkie</th>
+            <th>Baofeng / Analog Radio</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td><strong>Requires Cellular / Internet?</strong></td>
+            <td class="highlight-col"><span class="table-check">✓ ZERO INTERNET (Local Mesh)</span></td>
+            <td><span class="table-cross">✗ 100% Cloud Dependent</span></td>
+            <td><span class="table-check">✓ No Internet</span></td>
+          </tr>
+          <tr>
+            <td><strong>One-Way Voice Latency</strong></td>
+            <td class="highlight-col"><strong style="color:var(--neon-emerald);">&lt; 12 ms</strong> (Raw UDP)</td>
+            <td>85 – 220 ms (Server Relay)</td>
+            <td>~5 ms (Analog RF)</td>
+          </tr>
+          <tr>
+            <td><strong>Military Encryption</strong></td>
+            <td class="highlight-col"><span class="table-check">✓ ChaCha20-Poly1305</span></td>
+            <td>TLS / WebRTC (Centralized)</td>
+            <td><span class="table-cross">✗ None (Unencrypted RF)</span></td>
+          </tr>
+          <tr>
+            <td><strong>Earbud Noise Removal & Vocal Boost</strong></td>
+            <td class="highlight-col"><span class="table-check">✓ 5-Stage Studio DSP</span></td>
+            <td>Basic Software AGC</td>
+            <td><span class="table-cross">✗ Raw Squelch Hiss</span></td>
+          </tr>
+          <tr>
+            <td><strong>Monthly Subscription Fee</strong></td>
+            <td class="highlight-col"><strong style="color:var(--neon-emerald);">$0.00 Forever</strong></td>
+            <td>$9.99 / mo (Nitro / Enterprise)</td>
+            <td>FCC Licensing Fees</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       INTERACTIVE QR CODE & CALL LINK GENERATOR
+       ========================================================================== -->
+  <section class="section-wrapper">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>ZERO-CONFIG LINKING</span>
+      </div>
+      <h2 class="section-title">Generate Call Link & QR Code</h2>
+      <p class="section-subtitle">
+        Create instant tactical join links and scannable camera QR codes to invite any teammate into your secure intercom room.
+      </p>
+    </div>
+
+    <div class="qr-interactive-card tactical-frame">
+      <div class="room-input-group">
+        <label style="font-family:var(--text-mono); font-size:0.8rem; color:var(--text-secondary);">CALLSIGN / ROOM IDENTIFIER</label>
+        <input type="text" id="roomNameInput" class="tactical-input" value="ALPHA-SQUAD" placeholder="e.g. BRAVO-TEAM">
+        
+        <div style="display:flex; gap:0.75rem; margin-top:0.5rem;">
+          <button id="generateQrBtn" class="btn-tactical btn-cyan" style="flex:1;">GENERATE QR CODE</button>
+          <button id="copyCallLinkBtn" class="btn-tactical btn-secondary" style="flex:1;">COPY CALL LINK</button>
+        </div>
+
+        <p style="font-size:0.85rem; color:var(--text-secondary); margin-top:0.75rem; line-height:1.5;">
+          Teammates can scan this QR code with the EchoLink app camera scanner or click the universal link to connect in under 1 second.
+        </p>
+      </div>
+
+      <div class="qr-canvas-holder">
+        <canvas id="qrCodeCanvas" class="qr-canvas"></canvas>
+        <span style="font-family:var(--text-mono); font-size:0.7rem; color:var(--neon-cyan);">ECHOLINK ENCRYPTED HANDSHAKE QR</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       DOWNLOADS & SIDELOADING GUIDE SECTION
+       ========================================================================== -->
+  <section class="section-wrapper" id="downloads">
+    <div class="section-header">
+      <div class="tactical-tag">
+        <span class="dot"></span>
+        <span>DOWNLOAD RELEASES</span>
+      </div>
+      <h2 class="section-title">Download For Any Device</h2>
+      <p class="section-subtitle">
+        Official v2.4.0 builds compiled directly by GitHub Actions. No app store fees, no telemetry trackers.
+      </p>
+    </div>
+
+    <!-- Direct Download Cards -->
+    <div style="display:grid; grid-template-columns:1fr 1fr; gap:2rem; margin-bottom:4rem;">
+      
+      <!-- iOS Card -->
+      <div class="tactical-frame" style="display:flex; flex-direction:column; justify-content:space-between; gap:1.5rem;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <span class="step-badge">APPLE iOS 16+</span>
+            <span style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-emerald);">v2.4.0 RELEASE</span>
+          </div>
+          <h3 style="font-size:1.5rem; font-weight:800; margin-bottom:0.5rem;">EchoLink for iPhone</h3>
+          <p style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6;">
+            Native Swift / SwiftUI app with AVAudioEngine real-time DSP, ChaCha20-Poly1305 CryptoKit, and UDP multicast discovery.
+          </p>
+        </div>
+
+        <div>
+          <a href="https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-iOS-Unsigned.ipa" class="btn-tactical btn-primary" style="width:100%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M18.71 19.5c-.83 1.24-1.71 2.45-3.05 2.47-1.34.03-1.77-.79-3.29-.79-1.53 0-2 .77-3.27.82-1.31.05-2.3-1.32-3.14-2.53C4.25 17 2.94 12.45 4.7 9.39c.87-1.52 2.43-2.48 4.12-2.51 1.28-.02 2.5.87 3.29.87.78 0 2.26-1.07 3.81-.91.65.03 2.47.26 3.64 1.98-.09.06-2.17 1.28-2.15 3.81.03 3.02 2.65 4.03 2.68 4.04-.03.07-.42 1.44-1.38 2.83M15.97 6.37c.63-.78 1.06-1.85.94-2.93-.93.04-2.07.63-2.73 1.4-.58.67-1.1 1.76-.96 2.82 1.04.08 2.11-.53 2.75-1.29z"/></svg>
+            <span>DOWNLOAD .IPA (568 KB)</span>
+          </a>
+        </div>
+      </div>
+
+      <!-- Android Card -->
+      <div class="tactical-frame" style="display:flex; flex-direction:column; justify-content:space-between; gap:1.5rem;">
+        <div>
+          <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+            <span class="step-badge" style="color:var(--neon-cyan); background:rgba(0,229,255,0.1);">ANDROID 8.0+</span>
+            <span style="font-family:var(--text-mono); font-size:0.75rem; color:var(--neon-cyan);">v2.4.0 RELEASE</span>
+          </div>
+          <h3 style="font-size:1.5rem; font-weight:800; margin-bottom:0.5rem;">EchoLink for Android</h3>
+          <p style="font-size:0.95rem; color:var(--text-secondary); line-height:1.6;">
+            Native Kotlin / Jetpack Compose app with Oboe C++ ultra-low-latency audio engine, DTX silence gating, and multi-peer routing.
+          </p>
+        </div>
+
+        <div>
+          <a href="https://github.com/iamDVincci/EchoLink/releases/download/v2.4.0/EchoLink-Android-v2.4.0.apk" class="btn-tactical btn-cyan" style="width:100%;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><path d="M17.523 15.3414c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m-11.046 0c-.5511 0-.9993-.4486-.9993-1.0001s.4482-1.0001.9993-1.0001c.552 0 .9997.4486.9997 1.0001s-.4477 1.0001-.9997 1.0001m11.4045-6.02l1.9973-3.4592a.416.416 0 00-.1521-.5676.416.416 0 00-.5676.1521l-2.0223 3.503C15.5902 8.4116 13.8533 8 12 8s-3.5902.4116-5.1368.9497L4.8409 5.4467a.416.416 0 00-.5676-.1521.416.416 0 00-.1521.5676l1.9973 3.4592C2.6889 11.1867.3432 14.6589 0 18.761h24c-.3432-4.1021-2.6889-7.5743-6.1185-9.4396"/></svg>
+            <span>DOWNLOAD .APK (68 MB)</span>
+          </a>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Installation Step-By-Step Guide -->
+    <div id="guides">
+      <div class="install-tabs-nav">
+        <button class="install-tab-btn active" data-platform="guideIos">
+          <span>INSTALL ON IPHONE (FREE)</span>
+        </button>
+        <button class="install-tab-btn" data-platform="guideAndroid">
+          <span>INSTALL ON ANDROID</span>
+        </button>
+      </div>
+
+      <!-- iOS Installation Steps -->
+      <div class="install-platform-content active" id="guideIos">
+        <div class="install-steps-grid">
+          
+          <div class="step-card">
+            <span class="step-badge">STEP 01</span>
+            <h4>Download Sideloadly</h4>
+            <p>Download <a href="https://sideloadly.io" target="_blank" rel="noopener" style="color:var(--neon-emerald);">Sideloadly</a> on your Windows PC or Mac. Connect your iPhone via USB and tap "Trust This Computer".</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-badge">STEP 02</span>
+            <h4>Drag & Drop .IPA</h4>
+            <p>Open Sideloadly, enter your Apple ID email (any free Apple ID works), drag <strong>EchoLink-iOS-Unsigned.ipa</strong> into the window, and click <strong>Start</strong>.</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-badge">STEP 03</span>
+            <h4>Trust Developer App</h4>
+            <p>On your iPhone, go to <strong>Settings → General → VPN & Device Management</strong>, tap your Apple ID, and tap <strong>Trust</strong>. (On iOS 16+, enable Developer Mode in Privacy & Security).</p>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Android Installation Steps -->
+      <div class="install-platform-content" id="guideAndroid">
+        <div class="install-steps-grid">
+          
+          <div class="step-card">
+            <span class="step-badge">STEP 01</span>
+            <h4>Download .APK</h4>
+            <p>Download <strong>EchoLink-Android-v2.4.0.apk</strong> directly onto your Android device or PC.</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-badge">STEP 02</span>
+            <h4>Enable Unknown Sources</h4>
+            <p>When prompted by your browser or Files app, tap <strong>Settings</strong> and allow <em>"Install unknown apps"</em> for the installer.</p>
+          </div>
+
+          <div class="step-card">
+            <span class="step-badge">STEP 03</span>
+            <h4>Launch & Grant Permissions</h4>
+            <p>Open EchoLink and grant <strong>Microphone</strong> and <strong>Nearby Devices / Wi-Fi</strong> permissions for zero-latency peer discovery.</p>
+          </div>
+
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- ==========================================================================
+       SITE FOOTER
+       ========================================================================== -->
+  <footer class="site-footer">
+    <div class="footer-container">
+      
+      <div class="footer-col">
+        <div class="brand-logo" style="margin-bottom:0.5rem;">
+          <svg viewBox="0 0 64 64" fill="none" style="width:28px;height:28px;">
+            <circle cx="32" cy="32" r="28" stroke="#00FF9D" stroke-width="2" stroke-opacity="0.3" stroke-dasharray="4 4"/>
+            <circle cx="32" cy="32" r="18" stroke="#00FF9D" stroke-width="2" stroke-opacity="0.6"/>
+            <circle cx="32" cy="32" r="8" stroke="#00FF9D" stroke-width="2"/>
+            <circle cx="32" cy="32" r="3" fill="#00FF9D"/>
+          </svg>
+          <span>ECHOLINK</span>
+        </div>
+        <p style="font-size:0.9rem; color:var(--text-secondary); max-width:320px; line-height:1.6;">
+          Open-source, zero-server tactical voice intercom engineered for security, zero latency, and field durability.
+        </p>
+      </div>
+
+      <div class="footer-col">
+        <h5>Protocols</h5>
+        <ul class="footer-links">
+          <li><a href="#protocol">UDP Port 51111 (Voice)</a></li>
+          <li><a href="#protocol">TCP Port 51110 (Control)</a></li>
+          <li><a href="#protocol">UDP Port 51112 (Beacon)</a></li>
+          <li><a href="#dsp">5-Stage Studio DSP</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Platforms</h5>
+        <ul class="footer-links">
+          <li><a href="https://github.com/iamDVincci/EchoLink/releases/tag/v2.4.0">iOS 16+ (.ipa)</a></li>
+          <li><a href="https://github.com/iamDVincci/EchoLink/releases/tag/v2.4.0">Android 8.0+ (.apk)</a></li>
+          <li><a href="#guides">Sideloadly Guide</a></li>
+          <li><a href="#guides">AltStore Guide</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h5>Source Code</h5>
+        <ul class="footer-links">
+          <li><a href="https://github.com/iamDVincci/EchoLink" target="_blank" rel="noopener">GitHub Repository</a></li>
+          <li><a href="https://github.com/iamDVincci/EchoLink/releases" target="_blank" rel="noopener">Releases & Builds</a></li>
+          <li><a href="https://github.com/iamDVincci/EchoLink/actions" target="_blank" rel="noopener">GitHub Actions CI/CD</a></li>
+          <li><a href="https://github.com/iamDVincci/EchoLink/blob/main/LICENSE" target="_blank" rel="noopener">MIT License</a></li>
+        </ul>
+      </div>
+
+    </div>
+
+    <div class="footer-bottom">
+      <span>© 2026 EchoLink. Engineered by iamDVincci. Zero Rights Reserved / Open Source.</span>
+      <span style="color:var(--neon-emerald);">● ALL P2P PROTOCOLS OPERATIONAL</span>
+    </div>
+  </footer>
+
+  <!-- Scripts -->
+  <script src="js/main.js"></script>
+  <script src="js/radar.js"></script>
+  <script src="js/dsp.js"></script>
+  <script src="js/device-simulator.js"></script>
+</body>
+</html>
