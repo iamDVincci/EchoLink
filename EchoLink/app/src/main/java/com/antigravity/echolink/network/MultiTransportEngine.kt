@@ -10,6 +10,7 @@ import android.net.wifi.p2p.WifiP2pDevice
 import android.net.wifi.p2p.WifiP2pManager
 import android.os.Build
 import android.os.Looper
+import android.text.format.Formatter
 import android.util.Log
 import com.antigravity.echolink.audio.NativeAudioBridge
 import com.antigravity.echolink.crypto.EchoLinkCrypto
@@ -18,6 +19,7 @@ import com.antigravity.echolink.model.PacketTelemetry
 import com.antigravity.echolink.model.PeerNode
 import com.antigravity.echolink.model.TransportTier
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -104,6 +106,7 @@ class MultiTransportEngine @Inject constructor(
     private var receiverRegistered = false
 
     var onRemotePeerJoinedCallback: ((PeerNode) -> Unit)? = null
+    var onHandshakeStatusCallback: ((Boolean, String, String?, Int) -> Unit)? = null
 
     private var controlServerJob: Job? = null
     private var voiceUdpJob: Job? = null
@@ -238,6 +241,11 @@ class MultiTransportEngine @Inject constructor(
     }
 
     fun connectToPeer(peer: PeerNode) {
+        if (peer.ipAddress.isBlank() || peer.ipAddress == "0.0.0.0" || peer.ipAddress == "192.168.49.1") {
+            Log.w("MultiTransportEngine", "Cannot connect to peer with unroutable IP: ${peer.ipAddress}")
+            onHandshakeStatusCallback?.invoke(false, peer.ipAddress, null, 0)
+            return
+        }
         val resolvedPeer = peer.copy(name = resolvePeerName(peer.ipAddress, peer.name))
         val currentList = _activePeers.value.toMutableList()
         val existingIdx = currentList.indexOfFirst { it.ipAddress == resolvedPeer.ipAddress }
@@ -253,6 +261,7 @@ class MultiTransportEngine @Inject constructor(
             connectedPeerAddresses[resolvedPeer.ipAddress] = addr
             initiateControlHandshake(resolvedPeer.ipAddress)
         } catch (_: Exception) {
+            onHandshakeStatusCallback?.invoke(false, resolvedPeer.ipAddress, null, 0)
         }
         startVoiceUdpStreaming()
         startKeepAliveHeartbeats()
@@ -392,11 +401,17 @@ class MultiTransportEngine @Inject constructor(
     }
 
     private fun initiateControlHandshake(peerIp: String) {
+        if (peerIp.isBlank() || peerIp == "0.0.0.0" || peerIp == "192.168.49.1") {
+            Log.w("MultiTransportEngine", "Skipping control handshake for unroutable IP: $peerIp")
+            onHandshakeStatusCallback?.invoke(false, peerIp, null, 0)
+            return
+        }
         scope.launch {
             try {
                 val startMs = System.currentTimeMillis()
                 Socket().use { socket ->
-                    socket.connect(InetSocketAddress(peerIp, CONTROL_PORT), 2000)
+                    socket.soTimeout = 3000
+                    socket.connect(InetSocketAddress(peerIp, CONTROL_PORT), 3000)
                     val writer = PrintWriter(socket.getOutputStream(), true)
                     val reader = BufferedReader(InputStreamReader(socket.getInputStream()))
                     writer.println("ECHOLINK_HELLO:${crypto.getPublicKeyHex()}:${Build.MODEL}")
@@ -411,9 +426,14 @@ class MultiTransportEngine @Inject constructor(
                                 if (it.ipAddress == peerIp) it.copy(name = resolved, pingMs = rtt) else it
                             }
                         }
+                        onHandshakeStatusCallback?.invoke(true, peerIp, remoteModel, rtt)
+                        return@launch
                     }
                 }
-            } catch (_: Exception) {
+                onHandshakeStatusCallback?.invoke(false, peerIp, null, 0)
+            } catch (e: Exception) {
+                Log.w("MultiTransportEngine", "Handshake with $peerIp failed: ${e.message}")
+                onHandshakeStatusCallback?.invoke(false, peerIp, null, 0)
             }
         }
     }
@@ -528,6 +548,7 @@ class MultiTransportEngine @Inject constructor(
                     delay(20L)
                 }
             } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 Log.w("MultiTransportEngine", "UDP Voice socket recovery in 3s: ${e.message}")
                 delay(3000L)
                 if (_activePeers.value.isNotEmpty()) {
@@ -601,11 +622,16 @@ class MultiTransportEngine @Inject constructor(
                                 val localIp = getLocalIpAddress()
                                 _callLinkSession.value = _callLinkSession.value.copy(hostIp = localIp)
                                 val beaconMsg = "ECHOLINK_BEACON:${Build.MODEL}:$localIp:${crypto.sessionPin}".toByteArray()
-                                val bcastAddr = InetAddress.getByName("255.255.255.255")
-                                sock.send(DatagramPacket(beaconMsg, beaconMsg.size, bcastAddr, DISCOVERY_BROADCAST_PORT))
+                                val broadcastTargets = getBroadcastAddresses()
+                                for (target in broadcastTargets) {
+                                    try {
+                                        sock.send(DatagramPacket(beaconMsg, beaconMsg.size, target, DISCOVERY_BROADCAST_PORT))
+                                    } catch (_: Exception) {
+                                    }
+                                }
                             } catch (_: Exception) {
                             }
-                            delay(3000L)
+                            delay(2500L)
                         }
                     }
 
@@ -619,11 +645,20 @@ class MultiTransportEngine @Inject constructor(
                             if (text.startsWith("ECHOLINK_BEACON:")) {
                                 val parts = text.split(":")
                                 val peerModel = parts.getOrNull(1) ?: "EchoLink Peer"
-                                val peerIp = parts.getOrNull(2) ?: pkt.address.hostAddress ?: continue
+                                val declaredIp = parts.getOrNull(2) ?: ""
                                 val peerPin = parts.getOrNull(3) ?: "0000"
+                                val senderIp = pkt.address.hostAddress ?: ""
                                 val myIp = getLocalIpAddress()
-                                if (peerIp != myIp && peerIp != "127.0.0.1") {
-                                    upsertDiscoveredLanPeer(peerModel, peerIp, peerPin)
+
+                                // Physical packet source IP takes priority if declared IP is empty, loopback, or carrier CGNAT
+                                val effectivePeerIp = when {
+                                    senderIp.isNotBlank() && !senderIp.startsWith("127.") && !senderIp.startsWith("0.") -> senderIp
+                                    declaredIp.isNotBlank() && !declaredIp.startsWith("127.") && !declaredIp.startsWith("0.") -> declaredIp
+                                    else -> senderIp
+                                }
+
+                                if (effectivePeerIp.isNotBlank() && effectivePeerIp != myIp && effectivePeerIp != "127.0.0.1") {
+                                    upsertDiscoveredLanPeer(peerModel, effectivePeerIp, peerPin)
                                 }
                             }
                         } catch (_: Exception) {
@@ -656,6 +691,8 @@ class MultiTransportEngine @Inject constructor(
             isRealNetworkPeer = true
         )
         val current = _discoveredPeers.value.toMutableList()
+        // Purge dummy/phantom entries previously registered for this device (e.g. 192.168.49.1 or empty IP)
+        current.removeAll { it.name == resolvedName && (it.ipAddress == "192.168.49.1" || it.ipAddress.isBlank()) }
         val existingIdx = current.indexOfFirst { it.ipAddress == ipAddress }
         if (existingIdx >= 0) {
             current[existingIdx] = node
@@ -669,13 +706,22 @@ class MultiTransportEngine @Inject constructor(
     private fun upsertWifiP2pDevice(device: WifiP2pDevice) {
         val devName = device.deviceName?.takeIf { it.isNotBlank() } ?: "Wi-Fi Direct Node"
         val devAddr = device.deviceAddress ?: return
-        val ipAddress = "192.168.49.1"
-        val resolvedName = resolvePeerName(ipAddress, devName)
+
+        // If a peer with the same model/name already exists via LAN discovery with a valid reachable IP, do NOT overwrite it
+        val existingDiscovered = _discoveredPeers.value
+        if (existingDiscovered.any { (it.name == devName || it.name.contains(devName)) && it.ipAddress != "192.168.49.1" && it.ipAddress.isNotBlank() }) {
+            return
+        }
+
+        // Do not assign phantom 192.168.49.1 during MAC-only discovery phase
+        val ipAddress = ""
+
+        val resolvedName = resolvePeerName(devAddr, devName)
         val node = PeerNode(
             id = abs(devAddr.hashCode()),
             name = resolvedName,
             roleTag = "Wi-Fi Direct Peer",
-            nodeCode = "P2P MAC $devAddr",
+            nodeCode = if (ipAddress.isNotBlank()) "P2P IP $ipAddress" else "P2P MAC $devAddr",
             distanceMeters = 10,
             transport = TransportTier.WIFI_DIRECT,
             ipAddress = ipAddress,
@@ -781,21 +827,89 @@ class MultiTransportEngine @Inject constructor(
 
     fun getLocalIpAddress(): String {
         return try {
-            val interfaces = NetworkInterface.getNetworkInterfaces()
+            // Fast path for Wi-Fi station mode via WifiManager
+            try {
+                @Suppress("DEPRECATION")
+                val ipInt = wifiManager.connectionInfo?.ipAddress ?: 0
+                if (ipInt != 0) {
+                    val ipStr = Formatter.formatIpAddress(ipInt)
+                    if (ipStr != "0.0.0.0" && !ipStr.startsWith("127.")) {
+                        return ipStr
+                    }
+                }
+            } catch (_: Exception) {
+            }
+
+            val wifiOrApCandidates = mutableListOf<String>()
+            val otherCandidates = mutableListOf<String>()
+            val cellularFallback = mutableListOf<String>()
+
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return "0.0.0.0"
             while (interfaces.hasMoreElements()) {
                 val intf = interfaces.nextElement()
                 if (!intf.isUp || intf.isLoopback) continue
+                val name = intf.name.lowercase()
+
                 val addrs = intf.inetAddresses
                 while (addrs.hasMoreElements()) {
                     val addr = addrs.nextElement()
-                    if (addr is Inet4Address && !addr.isLoopbackAddress) {
-                        return addr.hostAddress ?: "0.0.0.0"
+                    if (addr is Inet4Address && !addr.isLoopbackAddress && !addr.isLinkLocalAddress) {
+                        val host = addr.hostAddress ?: continue
+                        if (host == "0.0.0.0" || host.startsWith("127.")) continue
+
+                        if (name.startsWith("wlan") || name.startsWith("ap") || 
+                            name.startsWith("softap") || name.startsWith("p2p") || 
+                            name.startsWith("eth") || name.startsWith("rndis") || 
+                            name.startsWith("swlan")) {
+                            wifiOrApCandidates.add(host)
+                        } else if (!name.startsWith("rmnet") && !name.startsWith("ccmni") && 
+                                   !name.startsWith("pdp") && !name.startsWith("dummy") && 
+                                   !name.startsWith("tun") && !name.startsWith("v4-")) {
+                            otherCandidates.add(host)
+                        } else {
+                            cellularFallback.add(host)
+                        }
                     }
                 }
             }
-            "0.0.0.0"
+
+            wifiOrApCandidates.firstOrNull()
+                ?: otherCandidates.firstOrNull()
+                ?: cellularFallback.firstOrNull()
+                ?: "0.0.0.0"
         } catch (_: Exception) {
             "0.0.0.0"
         }
+    }
+
+    fun getBroadcastAddresses(): List<InetAddress> {
+        val list = mutableListOf<InetAddress>()
+        try {
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return listOf(InetAddress.getByName("255.255.255.255"))
+            while (interfaces.hasMoreElements()) {
+                val intf = interfaces.nextElement()
+                if (!intf.isUp || intf.isLoopback) continue
+                val name = intf.name.lowercase()
+                val isPreferred = name.startsWith("wlan") || name.startsWith("ap") || 
+                                  name.startsWith("softap") || name.startsWith("p2p") || 
+                                  name.startsWith("eth") || name.startsWith("rndis")
+                for (ia in intf.interfaceAddresses) {
+                    val bcast = ia.broadcast
+                    if (bcast != null && !bcast.isLoopbackAddress) {
+                        if (isPreferred) {
+                            list.add(0, bcast)
+                        } else {
+                            list.add(bcast)
+                        }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        }
+        try {
+            list.add(InetAddress.getByName("255.255.255.255"))
+        } catch (_: Exception) {
+        }
+        return list.distinct()
     }
 }

@@ -146,6 +146,35 @@ class EchoLinkViewModel @Inject constructor(
                     "${joinedPeer.name} Joined Room",
                     "Connected on ${joinedPeer.ipAddress}"
                 )
+                delay(4000L)
+                if (_toastBannerMessage.value?.first?.contains("Joined Room") == true) {
+                    _toastBannerMessage.value = null
+                }
+            }
+        }
+
+        transportEngine.onHandshakeStatusCallback = { success, peerIp, remoteModel, rtt ->
+            viewModelScope.launch {
+                val peerName = transportEngine.resolvePeerName(peerIp, remoteModel ?: "Peer")
+                if (success) {
+                    _toastBannerMessage.value = Pair(
+                        "Connected with $peerName",
+                        "Encrypted P2P Voice Active • Latency: ${rtt}ms"
+                    )
+                    delay(4000L)
+                    if (_toastBannerMessage.value?.first?.startsWith("Connected with") == true) {
+                        _toastBannerMessage.value = null
+                    }
+                } else {
+                    _toastBannerMessage.value = Pair(
+                        "Linking Failed with $peerName",
+                        "Could not reach $peerIp on port 51110. Ensure both devices are on same Wi-Fi/Hotspot."
+                    )
+                    delay(5000L)
+                    if (_toastBannerMessage.value?.first?.startsWith("Linking Failed") == true) {
+                        _toastBannerMessage.value = null
+                    }
+                }
             }
         }
 
@@ -246,10 +275,22 @@ class EchoLinkViewModel @Inject constructor(
 
     fun connectToRadarNode(peer: PeerNode) {
         viewModelScope.launch {
+            if (peer.ipAddress.isBlank() || peer.ipAddress == "0.0.0.0" || peer.ipAddress == "192.168.49.1") {
+                _toastBannerMessage.value = Pair(
+                    "Cannot Link with ${peer.name}",
+                    "Device IP address is unresolved. Ensure device is on local Wi-Fi or Hotspot."
+                )
+                delay(4000L)
+                if (_toastBannerMessage.value?.first?.startsWith("Cannot Link") == true) {
+                    _toastBannerMessage.value = null
+                }
+                return@launch
+            }
+
             val resolvedName = transportEngine.resolvePeerName(peer.ipAddress, peer.name)
             val resolvedPeer = peer.copy(name = resolvedName)
             _toastBannerMessage.value = Pair(
-                "Linking with ${resolvedPeer.name} (${resolvedPeer.ipAddress})",
+                "Linking with ${resolvedPeer.name} (${resolvedPeer.ipAddress})...",
                 "Protocol: ${resolvedPeer.transport.fullName} • Port ${resolvedPeer.voicePort}"
             )
             saveRecentPeer(resolvedPeer)
@@ -299,6 +340,12 @@ class EchoLinkViewModel @Inject constructor(
             "Device History Cleared",
             "Removed all saved connected devices"
         )
+        viewModelScope.launch {
+            delay(3000L)
+            if (_toastBannerMessage.value?.first == "Device History Cleared") {
+                _toastBannerMessage.value = null
+            }
+        }
     }
 
     fun openRenamePeerDialog(ipAddress: String, currentName: String) {
@@ -340,6 +387,12 @@ class EchoLinkViewModel @Inject constructor(
             "Device Renamed to \"$clean\"",
             "Saved for $ipAddress"
         )
+        viewModelScope.launch {
+            delay(3000L)
+            if (_toastBannerMessage.value?.first?.startsWith("Device Renamed") == true) {
+                _toastBannerMessage.value = null
+            }
+        }
     }
 
     private fun loadSavedCustomPeerNames(): Map<String, String> {
@@ -392,6 +445,12 @@ class EchoLinkViewModel @Inject constructor(
             "Offline Mesh Room Created",
             "Host IP: ${callLinkSession.value.hostIp} • PIN: ${callLinkSession.value.pinCode}"
         )
+        viewModelScope.launch {
+            delay(4000L)
+            if (_toastBannerMessage.value?.first == "Offline Mesh Room Created") {
+                _toastBannerMessage.value = null
+            }
+        }
     }
 
     fun closeCallLinkQrModal() {
@@ -435,6 +494,12 @@ class EchoLinkViewModel @Inject constructor(
                 "Missing Peer IP or QR URI",
                 "Scan a peer's QR code or enter their P2P/LAN IP address"
             )
+            viewModelScope.launch {
+                delay(3500L)
+                if (_toastBannerMessage.value?.first == "Missing Peer IP or QR URI") {
+                    _toastBannerMessage.value = null
+                }
+            }
             return
         }
         closeScanLinkModal()
@@ -445,6 +510,10 @@ class EchoLinkViewModel @Inject constructor(
         saveRecentPeer(joined)
         startForegroundIntercomService(peerCount = transportEngine.activePeers.value.size.coerceAtLeast(1))
         _isInActiveVoiceSession.value = true
+        _toastBannerMessage.value = Pair(
+            "Linking with ${joined.name} (${joined.ipAddress})...",
+            "Connecting to encrypted P2P channel"
+        )
     }
 
     fun dismissToastBanner() {
@@ -542,6 +611,16 @@ class EchoLinkViewModel @Inject constructor(
             audioBridge.stopEngine()
         }
         transportEngine.disconnectAll()
+        _toastBannerMessage.value = Pair(
+            "Session Disconnected",
+            "Returned to Radar Scanning"
+        )
+        viewModelScope.launch {
+            delay(2500L)
+            if (_toastBannerMessage.value?.first == "Session Disconnected") {
+                _toastBannerMessage.value = null
+            }
+        }
         try {
             val stopIntent = Intent(appContext, EchoLinkIntercomService::class.java).apply {
                 action = EchoLinkIntercomService.ACTION_DISCONNECT
