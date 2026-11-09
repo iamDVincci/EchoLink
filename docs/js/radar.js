@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ECHOLINK INTERACTIVE RADAR SWEEP ENGINE
+   ECHOLINK INTERACTIVE RADAR SWEEP ENGINE (RESPONSIVE)
    ========================================================================== */
 
 (function initRadarSweep() {
@@ -7,11 +7,24 @@
   if (!canvas) return;
   const ctx = canvas.getContext('2d');
 
-  let width = (canvas.width = 460);
-  let height = (canvas.height = 460);
+  let width = 460;
+  let height = 460;
   let cx = width / 2;
   let cy = height / 2;
   let radius = width / 2 - 20;
+
+  function handleResize() {
+    const rect = canvas.getBoundingClientRect();
+    const size = Math.min(460, Math.max(260, Math.floor(rect.width || 460)));
+    width = canvas.width = size;
+    height = canvas.height = size;
+    cx = width / 2;
+    cy = height / 2;
+    radius = Math.max(100, width / 2 - 16);
+  }
+
+  handleResize();
+  window.addEventListener('resize', handleResize);
 
   let angle = 0;
   const speed = 0.022; // Sweep rotational speed (radians/frame)
@@ -50,7 +63,8 @@
       ctx.setLineDash([]);
 
       // Ring Range Text
-      ctx.font = '10px JetBrains Mono, monospace';
+      const fontSize = Math.max(8, Math.round(width / 46));
+      ctx.font = `${fontSize}px JetBrains Mono, monospace`;
       ctx.fillStyle = 'rgba(0, 255, 157, 0.45)';
       ctx.fillText(`${i * 25}m`, cx + 6, cy - r + 12);
     }
@@ -79,9 +93,9 @@
     ctx.save();
     ctx.translate(cx, cy);
 
-    // Phosphor sweep trail (conic gradient simulation with arcs)
-    const trailSegments = 30;
-    const trailAngle = 0.55; // width of trail in radians
+    // Phosphor sweep trail
+    const trailSegments = 26;
+    const trailAngle = 0.55;
     for (let i = 0; i < trailSegments; i++) {
       let startA = angle - (trailAngle / trailSegments) * (i + 1);
       let endA = angle - (trailAngle / trailSegments) * i;
@@ -113,37 +127,37 @@
       let px = cx + Math.cos(peer.angle) * (peer.dist * radius);
       let py = cy + Math.sin(peer.angle) * (peer.dist * radius);
 
-      // Check if sweep line is crossing this peer
       let diff = (angle - peer.angle) % (Math.PI * 2);
       if (diff < 0) diff += Math.PI * 2;
       let isLit = diff < 0.35;
 
       ctx.save();
-      // Ping ripple on sweep pass
       if (isLit) {
         ctx.beginPath();
-        ctx.arc(px, py, 12, 0, Math.PI * 2);
+        ctx.arc(px, py, 10, 0, Math.PI * 2);
         ctx.strokeStyle = peer.color;
         ctx.lineWidth = 1.5;
         ctx.shadowColor = peer.color;
-        ctx.shadowBlur = 12;
+        ctx.shadowBlur = 10;
         ctx.stroke();
       }
 
-      // Blip core
       ctx.beginPath();
-      ctx.arc(px, py, isLit ? 5 : 3.5, 0, Math.PI * 2);
+      ctx.arc(px, py, isLit ? 4.5 : 3, 0, Math.PI * 2);
       ctx.fillStyle = peer.color;
       ctx.shadowColor = peer.color;
-      ctx.shadowBlur = isLit ? 14 : 4;
+      ctx.shadowBlur = isLit ? 12 : 4;
       ctx.fill();
 
-      // Blip tactical label
-      ctx.font = '9px JetBrains Mono, monospace';
-      ctx.fillStyle = isLit ? '#ffffff' : 'rgba(255, 255, 255, 0.55)';
-      ctx.fillText(peer.name, px + 8, py - 4);
-      ctx.fillStyle = peer.color;
-      ctx.fillText(peer.status, px + 8, py + 7);
+      // Only show full label if screen width is not cramped
+      if (width > 300) {
+        const labelSize = Math.max(8, Math.round(width / 52));
+        ctx.font = `${labelSize}px JetBrains Mono, monospace`;
+        ctx.fillStyle = isLit ? '#ffffff' : 'rgba(255, 255, 255, 0.55)';
+        ctx.fillText(peer.name, px + 7, py - 3);
+        ctx.fillStyle = peer.color;
+        ctx.fillText(peer.status, px + 7, py + 7);
+      }
 
       ctx.restore();
     });
@@ -152,8 +166,8 @@
   function drawUserPings() {
     for (let i = userPings.length - 1; i >= 0; i--) {
       let p = userPings[i];
-      p.r += 1.8;
-      p.alpha -= 0.018;
+      p.r += 1.6;
+      p.alpha -= 0.02;
 
       ctx.save();
       ctx.beginPath();
@@ -176,7 +190,6 @@
     drawPeers();
     drawUserPings();
 
-    // Update Telemetry bearing HUD text
     let degrees = Math.round((angle * 180) / Math.PI);
     const bearingEl = document.getElementById('hudBearingVal');
     if (bearingEl) bearingEl.textContent = `${degrees.toString().padStart(3, '0')}°`;
@@ -184,7 +197,6 @@
     requestAnimationFrame(animate);
   }
 
-  // Interactive Click on Radar to Ping
   canvas.addEventListener('click', (e) => {
     const rect = canvas.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * width;
@@ -192,7 +204,6 @@
 
     userPings.push({ x, y, r: 4, alpha: 1.0 });
 
-    // Toast confirmation
     if (window.showTacticalToast) {
       window.showTacticalToast('TACTICAL BEACON TRANSMITTED (UDP 51112)');
     }

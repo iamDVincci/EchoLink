@@ -20,19 +20,38 @@ window.showTacticalToast = function(msg) {
 };
 
 document.addEventListener('DOMContentLoaded', () => {
-  // 2. Navbar Scroll Dynamic Shadow
+  // 2. Responsive Mobile Drawer Navigation Toggle
+  const mobileToggle = document.getElementById('mobileNavToggle');
+  const mobileDrawer = document.getElementById('mobileNavDrawer');
+  const mobileLinks = document.querySelectorAll('.mobile-nav-link');
+
+  if (mobileToggle && mobileDrawer) {
+    mobileToggle.addEventListener('click', () => {
+      const isOpen = mobileDrawer.classList.toggle('open');
+      mobileToggle.classList.toggle('active', isOpen);
+    });
+
+    mobileLinks.forEach((link) => {
+      link.addEventListener('click', () => {
+        mobileDrawer.classList.remove('open');
+        mobileToggle.classList.remove('active');
+      });
+    });
+  }
+
+  // 3. Navbar Scroll Dynamic Shadow
   const navbar = document.querySelector('.navbar');
   window.addEventListener('scroll', () => {
     if (window.scrollY > 40) {
-      navbar.style.background = 'rgba(5, 8, 11, 0.92)';
+      navbar.style.background = 'rgba(5, 8, 11, 0.94)';
       navbar.style.borderBottomColor = 'rgba(0, 255, 157, 0.22)';
     } else {
-      navbar.style.background = 'rgba(5, 8, 11, 0.8)';
+      navbar.style.background = 'rgba(5, 8, 11, 0.82)';
       navbar.style.borderBottomColor = 'rgba(0, 255, 157, 0.08)';
     }
   });
 
-  // 3. Interactive Wire Protocol Byte Inspector
+  // 4. Interactive Wire Protocol Byte Inspector (Hover + Touch Support)
   const byteBlocks = document.querySelectorAll('.byte-block');
   const detailTitle = document.getElementById('packetDetailTitle');
   const detailBody = document.getElementById('packetDetailBody');
@@ -72,19 +91,22 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   };
 
+  function selectByteBlock(block) {
+    byteBlocks.forEach((b) => b.classList.remove('active'));
+    block.classList.add('active');
+    const key = block.getAttribute('data-field');
+    if (byteDetails[key] && detailTitle && detailBody) {
+      detailTitle.textContent = byteDetails[key].title;
+      detailBody.textContent = byteDetails[key].body;
+    }
+  }
+
   byteBlocks.forEach((block) => {
-    block.addEventListener('mouseenter', () => {
-      byteBlocks.forEach((b) => b.classList.remove('active'));
-      block.classList.add('active');
-      const key = block.getAttribute('data-field');
-      if (byteDetails[key] && detailTitle && detailBody) {
-        detailTitle.textContent = byteDetails[key].title;
-        detailBody.textContent = byteDetails[key].body;
-      }
-    });
+    block.addEventListener('mouseenter', () => selectByteBlock(block));
+    block.addEventListener('click', () => selectByteBlock(block));
   });
 
-  // 4. Interactive Call Link & Tactical QR Code Generator
+  // 5. Interactive Call Link & Tactical QR Code Generator
   const qrCanvas = document.getElementById('qrCodeCanvas');
   const roomInput = document.getElementById('roomNameInput');
   const genQrBtn = document.getElementById('generateQrBtn');
@@ -103,7 +125,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const modSize = Math.floor((size - 24) / modules);
     const offset = Math.floor((size - (modules * modSize)) / 2);
 
-    // Seeded pseudo-random pattern based on text
     let hash = 0;
     for (let i = 0; i < text.length; i++) {
       hash = (hash << 5) - hash + text.charCodeAt(i);
@@ -114,7 +135,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
     for (let r = 0; r < modules; r++) {
       for (let c = 0; c < modules; c++) {
-        // Corner Position Finder Patterns
         const isTL = (r < 7 && c < 7);
         const isTR = (r < 7 && c >= modules - 7);
         const isBL = (r >= modules - 7 && c < 7);
@@ -125,7 +145,6 @@ document.addEventListener('DOMContentLoaded', () => {
           let pc = c < 7 ? c : c - (modules - 7);
           fill = (pr === 0 || pr === 6 || pc === 0 || pc === 6 || (pr >= 2 && pr <= 4 && pc >= 2 && pc <= 4));
         } else {
-          // Inner data matrix
           const pseudoVal = Math.sin(hash * 0.1 + r * 13 + c * 7);
           fill = pseudoVal > 0.15;
         }
@@ -139,13 +158,9 @@ document.addEventListener('DOMContentLoaded', () => {
     // High-tech Corner Targeting Brackets
     ctx.strokeStyle = '#00e5ff';
     ctx.lineWidth = 2;
-    // Top Left
     ctx.strokeRect(4, 4, 12, 12);
-    // Top Right
     ctx.strokeRect(size - 16, 4, 12, 12);
-    // Bottom Left
     ctx.strokeRect(4, size - 16, 12, 12);
-    // Bottom Right
     ctx.strokeRect(size - 16, size - 16, 12, 12);
   }
 
@@ -155,8 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
       renderTacticalQr(`echolink://join?room=${encodeURIComponent(room)}`);
       window.showTacticalToast(`CALL LINK GENERATED FOR ROOM: ${room}`);
     });
-    // Initial QR render
-    renderTacticalQr('echolink://join?room=ALPHA-7');
+    renderTacticalQr('echolink://join?room=ALPHA-SQUAD');
   }
 
   if (copyLinkBtn && roomInput) {
@@ -165,11 +179,13 @@ document.addEventListener('DOMContentLoaded', () => {
       const link = `echolink://join?room=${encodeURIComponent(room)}&freq=51111`;
       navigator.clipboard.writeText(link).then(() => {
         window.showTacticalToast('UNIVERSAL CALL LINK COPIED TO CLIPBOARD');
+      }).catch(() => {
+        window.showTacticalToast('LINK: ' + link);
       });
     });
   }
 
-  // 5. Installation Platform Tabs (iOS vs Android)
+  // 6. Installation Platform Tabs (iOS vs Android)
   const installTabs = document.querySelectorAll('.install-tab-btn');
   const installPanels = document.querySelectorAll('.install-platform-content');
 
@@ -184,7 +200,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   });
 
-  // 6. Scroll-Triggered Fade-In & Telemetry Counter Animation
+  // 7. Scroll-Triggered Fade-In Animation
   const observer = new IntersectionObserver((entries) => {
     entries.forEach((entry) => {
       if (entry.isIntersecting) {
@@ -192,11 +208,11 @@ document.addEventListener('DOMContentLoaded', () => {
         entry.target.style.transform = 'translateY(0)';
       }
     });
-  }, { threshold: 0.1 });
+  }, { threshold: 0.08 });
 
   document.querySelectorAll('.section-header, .tactical-frame, .step-card').forEach((el) => {
     el.style.opacity = '0';
-    el.style.transform = 'translateY(24px)';
+    el.style.transform = 'translateY(20px)';
     el.style.transition = 'all 0.6s cubic-bezier(0.16, 1, 0.3, 1)';
     observer.observe(el);
   });
