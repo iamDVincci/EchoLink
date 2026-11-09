@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDevelopmentRegion</key>
+	<string>$(DEVELOPMENT_LANGUAGE)</string>
+	<key>CFBundleDisplayName</key>
+	<string>EchoLink</string>
+	<key>CFBundleExecutable</key>
+	<string>$(EXECUTABLE_NAME)</string>
+	<key>CFBundleIdentifier</key>
+	<string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+	<key>CFBundleInfoDictionaryVersion</key>
+	<string>6.0</string>
+	<key>CFBundleName</key>
+	<string>$(PRODUCT_NAME)</string>
+	<key>CFBundlePackageType</key>
+	<string>$(PRODUCT_BUNDLE_PACKAGE_TYPE)</string>
+	<key>CFBundleShortVersionString</key>
+	<string>2.4.0</string>
+	<key>CFBundleVersion</key>
+	<string>24</string>
+	<key>LSRequiresIPhoneOS</key>
+	<true/>
+	<key>NSMicrophoneUsageDescription</key>
+	<string>EchoLink requires microphone access for ultra-low-latency encrypted P2P voice intercom.</string>
+	<key>NSCameraUsageDescription</key>
+	<string>EchoLink uses the camera to scan peer Call Link QR codes for instant offline room pairing.</string>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>EchoLink discovers and links with nearby Android and iOS devices directly over local Wi-Fi and Hotspot without internet.</string>
+	<key>NSBluetoothAlwaysUsageDescription</key>
+	<string>EchoLink routes voice to AirPods and Bluetooth headsets and supports proximity peer discovery.</string>
+	<key>NSBonjourServices</key>
+	<array>
+		<string>_echolink._udp</string>
+		<string>_echolink._tcp</string>
+	</array>
+	<key>UIBackgroundModes</key>
+	<array>
+		<string>audio</string>
+		<string>voip</string>
+	</array>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>CFBundleURLName</key>
+			<string>com.antigravity.echolink</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>echolink</string>
+			</array>
+		</dict>
+	</array>
+	<key>UIApplicationSceneManifest</key>
+	<dict>
+		<key>UIApplicationSupportsMultipleScenes</key>
+		<false/>
+	</dict>
+	<key>UILaunchScreen</key>
+	<dict>
+		<key>UIColorName</key>
+		<string>AccentColor</string>
+	</dict>
+	<key>UISupportedInterfaceOrientations</key>
+	<array>
+		<string>UIInterfaceOrientationPortrait</string>
+	</array>
+	<key>UIUserInterfaceStyle</key>
+	<string>Dark</string>
+</dict>
+</plist>

@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">EchoLink</string>
+    <string name="notification_channel_name">EchoLink Tactical Intercom</string>
+    <string name="notification_channel_desc">Active ultra-low-latency P2P voice link controls</string>
+</resources>

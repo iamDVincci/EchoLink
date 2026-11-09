@@ -1,0 +1,292 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 56;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		A10000010000000000000001 /* EchoLinkApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000010000000000000001 /* EchoLinkApp.swift */; };
+		A10000020000000000000001 /* EchoLinkModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000020000000000000001 /* EchoLinkModels.swift */; };
+		A10000030000000000000001 /* EchoLinkTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000030000000000000001 /* EchoLinkTheme.swift */; };
+		A10000040000000000000001 /* EchoLinkCrypto.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000040000000000000001 /* EchoLinkCrypto.swift */; };
+		A10000050000000000000001 /* EchoLinkPacket.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000050000000000000001 /* EchoLinkPacket.swift */; };
+		A10000060000000000000001 /* MultiTransportEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000060000000000000001 /* MultiTransportEngine.swift */; };
+		A10000070000000000000001 /* NativeAudioEngine.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000070000000000000001 /* NativeAudioEngine.swift */; };
+		A10000080000000000000001 /* EarbudRoutingManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000080000000000000001 /* EarbudRoutingManager.swift */; };
+		A10000090000000000000001 /* EchoLinkViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A20000090000000000000001 /* EchoLinkViewModel.swift */; };
+		A100000A0000000000000001 /* GlobalComponents.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000A0000000000000001 /* GlobalComponents.swift */; };
+		A100000B0000000000000001 /* SonarRadarHomeScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000B0000000000000001 /* SonarRadarHomeScreen.swift */; };
+		A100000C0000000000000001 /* ActiveVoiceIntercomScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000C0000000000000001 /* ActiveVoiceIntercomScreen.swift */; };
+		A100000D0000000000000001 /* RfStatsAndAudioScreens.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000D0000000000000001 /* RfStatsAndAudioScreens.swift */; };
+		A100000E0000000000000001 /* ReadinessCheckScreen.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000E0000000000000001 /* ReadinessCheckScreen.swift */; };
+		A100000F0000000000000001 /* CallLinkQrModalSheet.swift in Sources */ = {isa = PBXBuildFile; fileRef = A200000F0000000000000001 /* CallLinkQrModalSheet.swift */; };
+		A10000100000000000000001 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = A20000100000000000000001 /* Assets.xcassets */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		A20000000000000000000001 /* EchoLink.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = EchoLink.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		A20000010000000000000001 /* EchoLinkApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = EchoLinkApp.swift; sourceTree = "<group>"; };
+		A20000020000000000000001 /* EchoLinkModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Models/EchoLinkModels.swift; sourceTree = "<group>"; };
+		A20000030000000000000001 /* EchoLinkTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Theme/EchoLinkTheme.swift; sourceTree = "<group>"; };
+		A20000040000000000000001 /* EchoLinkCrypto.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Crypto/EchoLinkCrypto.swift; sourceTree = "<group>"; };
+		A20000050000000000000001 /* EchoLinkPacket.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network/EchoLinkPacket.swift; sourceTree = "<group>"; };
+		A20000060000000000000001 /* MultiTransportEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Network/MultiTransportEngine.swift; sourceTree = "<group>"; };
+		A20000070000000000000001 /* NativeAudioEngine.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio/NativeAudioEngine.swift; sourceTree = "<group>"; };
+		A20000080000000000000001 /* EarbudRoutingManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Audio/EarbudRoutingManager.swift; sourceTree = "<group>"; };
+		A20000090000000000000001 /* EchoLinkViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewModel/EchoLinkViewModel.swift; sourceTree = "<group>"; };
+		A200000A0000000000000001 /* GlobalComponents.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Components/GlobalComponents.swift; sourceTree = "<group>"; };
+		A200000B0000000000000001 /* SonarRadarHomeScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/SonarRadarHomeScreen.swift; sourceTree = "<group>"; };
+		A200000C0000000000000001 /* ActiveVoiceIntercomScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/ActiveVoiceIntercomScreen.swift; sourceTree = "<group>"; };
+		A200000D0000000000000001 /* RfStatsAndAudioScreens.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/RfStatsAndAudioScreens.swift; sourceTree = "<group>"; };
+		A200000E0000000000000001 /* ReadinessCheckScreen.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/ReadinessCheckScreen.swift; sourceTree = "<group>"; };
+		A200000F0000000000000001 /* CallLinkQrModalSheet.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Screens/CallLinkQrModalSheet.swift; sourceTree = "<group>"; };
+		A20000100000000000000001 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		A20000110000000000000001 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		A30000010000000000000001 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		A40000010000000000000001 = {
+			isa = PBXGroup;
+			children = (
+				A40000020000000000000001 /* EchoLink */,
+				A40000030000000000000001 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		A40000020000000000000001 /* EchoLink */ = {
+			isa = PBXGroup;
+			children = (
+				A20000010000000000000001 /* EchoLinkApp.swift */,
+				A20000020000000000000001 /* EchoLinkModels.swift */,
+				A20000030000000000000001 /* EchoLinkTheme.swift */,
+				A20000040000000000000001 /* EchoLinkCrypto.swift */,
+				A20000050000000000000001 /* EchoLinkPacket.swift */,
+				A20000060000000000000001 /* MultiTransportEngine.swift */,
+				A20000070000000000000001 /* NativeAudioEngine.swift */,
+				A20000080000000000000001 /* EarbudRoutingManager.swift */,
+				A20000090000000000000001 /* EchoLinkViewModel.swift */,
+				A200000A0000000000000001 /* GlobalComponents.swift */,
+				A200000B0000000000000001 /* SonarRadarHomeScreen.swift */,
+				A200000C0000000000000001 /* ActiveVoiceIntercomScreen.swift */,
+				A200000D0000000000000001 /* RfStatsAndAudioScreens.swift */,
+				A200000E0000000000000001 /* ReadinessCheckScreen.swift */,
+				A200000F0000000000000001 /* CallLinkQrModalSheet.swift */,
+				A20000100000000000000001 /* Assets.xcassets */,
+				A20000110000000000000001 /* Info.plist */,
+			);
+			path = EchoLink;
+			sourceTree = "<group>";
+		};
+		A40000030000000000000001 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A20000000000000000000001 /* EchoLink.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		A50000010000000000000001 /* EchoLink */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = A80000020000000000000001 /* Build configuration list for PBXNativeTarget "EchoLink" */;
+			buildPhases = (
+				A60000010000000000000001 /* Sources */,
+				A30000010000000000000001 /* Frameworks */,
+				A70000010000000000000001 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = EchoLink;
+			productName = EchoLink;
+			productReference = A20000000000000000000001 /* EchoLink.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		A90000010000000000000001 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = 1;
+				LastSwiftUpdateCheck = 1500;
+				LastUpgradeCheck = 1500;
+			};
+			buildConfigurationList = A80000010000000000000001 /* Build configuration list for PBXProject "EchoLink" */;
+			compatibilityVersion = "Xcode 14.0";
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+				Base,
+			);
+			mainGroup = A40000010000000000000001;
+			productRefGroup = A40000030000000000000001 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				A50000010000000000000001 /* EchoLink */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		A70000010000000000000001 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000100000000000000001 /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		A60000010000000000000001 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A10000010000000000000001 /* EchoLinkApp.swift in Sources */,
+				A10000020000000000000001 /* EchoLinkModels.swift in Sources */,
+				A10000030000000000000001 /* EchoLinkTheme.swift in Sources */,
+				A10000040000000000000001 /* EchoLinkCrypto.swift in Sources */,
+				A10000050000000000000001 /* EchoLinkPacket.swift in Sources */,
+				A10000060000000000000001 /* MultiTransportEngine.swift in Sources */,
+				A10000070000000000000001 /* NativeAudioEngine.swift in Sources */,
+				A10000080000000000000001 /* EarbudRoutingManager.swift in Sources */,
+				A10000090000000000000001 /* EchoLinkViewModel.swift in Sources */,
+				A100000A0000000000000001 /* GlobalComponents.swift in Sources */,
+				A100000B0000000000000001 /* SonarRadarHomeScreen.swift in Sources */,
+				A100000C0000000000000001 /* ActiveVoiceIntercomScreen.swift in Sources */,
+				A100000D0000000000000001 /* RfStatsAndAudioScreens.swift in Sources */,
+				A100000E0000000000000001 /* ReadinessCheckScreen.swift in Sources */,
+				A100000F0000000000000001 /* CallLinkQrModalSheet.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		AA0000010000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = iphoneos;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+			};
+			name = Debug;
+		};
+		AA0000020000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				VALIDATE_PRODUCT = YES;
+			};
+			name = Release;
+		};
+		AA0000030000000000000001 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 24;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EchoLink/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.echolink;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Debug;
+		};
+		AA0000040000000000000001 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 24;
+				GENERATE_INFOPLIST_FILE = NO;
+				INFOPLIST_FILE = EchoLink/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 2.4.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.antigravity.echolink;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		A80000010000000000000001 /* Build configuration list for PBXProject "EchoLink" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000010000000000000001 /* Debug */,
+				AA0000020000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		A80000020000000000000001 /* Build configuration list for PBXNativeTarget "EchoLink" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AA0000030000000000000001 /* Debug */,
+				AA0000040000000000000001 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = A90000010000000000000001 /* Project object */;
+}

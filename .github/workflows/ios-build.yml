@@ -1,0 +1,65 @@
+name: Build EchoLink iOS (.ipa & Release)
+
+on:
+  push:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build-ios:
+    name: Build EchoLink iOS on macOS
+    runs-on: macos-14
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Generate Xcode Project via XcodeGen
+        working-directory: EchoLink-iOS
+        run: |
+          if ! command -v xcodegen &> /dev/null; then
+            brew install xcodegen
+          fi
+          xcodegen generate
+
+      - name: Build iOS Device Binary (Unsigned .ipa for Sideloadly / AltStore / TrollStore)
+        working-directory: EchoLink-iOS
+        run: |
+          xcodebuild clean build \
+            -project EchoLink.xcodeproj \
+            -scheme EchoLink \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
+
+          mkdir -p Payload
+          cp -r build/Build/Products/Release-iphoneos/EchoLink.app Payload/
+          zip -r EchoLink-iOS-Unsigned.ipa Payload
+
+      - name: Upload EchoLink-iOS-Unsigned.ipa Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: EchoLink-iOS-IPA
+          path: EchoLink-iOS/EchoLink-iOS-Unsigned.ipa
+
+      - name: Publish Release with Downloadable .ipa
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v2.4.0
+          name: "EchoLink v2.4.0 (iOS .ipa & Android)"
+          body: |
+            ### EchoLink v2.4.0 — Cross-Platform P2P Tactical Voice Intercom (iOS & Android)
+            - **Direct iOS `.ipa` Download**: `EchoLink-iOS-Unsigned.ipa` attached below.
+            - **Install on any iPhone (No Paid Apple Developer Account Required)**:
+              1. **Sideloadly (Windows / macOS)**: Download `EchoLink-iOS-Unsigned.ipa`, open [Sideloadly](https://sideloadly.io/), connect your iPhone via USB, enter your Apple ID, drag-and-drop `EchoLink-iOS-Unsigned.ipa`, and click **Start**.
+              2. **AltStore / SideStore (Direct on iPhone)**: Open `EchoLink-iOS-Unsigned.ipa` in the AltStore or SideStore app on your iPhone.
+              3. **Xcode (macOS)**: Open `EchoLink-iOS/EchoLink.xcodeproj` in Xcode, select your connected iPhone, and press `Cmd + R`.
+          files: EchoLink-iOS/EchoLink-iOS-Unsigned.ipa
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

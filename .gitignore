@@ -1,0 +1,22 @@
+# Gradle & Android Build Artifacts
+.gradle/
+**/build/
+**/.gradle/
+**/.cxx/
+**/local.properties
+*.apk
+*.aab
+*.ap_
+*.dex
+
+# IDE & OS Files
+.idea/
+*.iml
+.DS_Store
+Thumbs.db
+*.swp
+
+# Xcode DerivedData / UserData
+**/DerivedData/
+**/xcuserdata/
+*.ipa
