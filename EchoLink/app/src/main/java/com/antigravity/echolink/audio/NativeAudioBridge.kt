@@ -9,6 +9,7 @@ import android.media.MediaRecorder
 import android.media.audiofx.AcousticEchoCanceler
 import android.media.audiofx.NoiseSuppressor
 import android.util.Log
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -179,7 +180,11 @@ class NativeAudioBridge @Inject constructor() {
         if (nativeLibraryLoaded) {
             return nativeStartEngine(sampleRate, frameSizeMs)
         }
-        if (isRunning.getAndSet(true)) return true
+        val prevJob = audioLoopJob
+        if (prevJob != null && prevJob.isActive) {
+            prevJob.cancel()
+        }
+        isRunning.set(true)
         startLowLatencyHardwarePipeline(sampleRate, frameSizeMs)
         return true
     }
@@ -190,7 +195,9 @@ class NativeAudioBridge @Inject constructor() {
             return
         }
         isRunning.set(false)
-        audioLoopJob?.cancel()
+        val job = audioLoopJob
+        audioLoopJob = null
+        job?.cancel()
         releaseHardwareAudio()
     }
 
@@ -283,27 +290,50 @@ class NativeAudioBridge @Inject constructor() {
                     AudioFormat.ENCODING_PCM_16BIT
                 ).coerceAtLeast(frameSamples * 2)
 
-                val recorder = AudioRecord.Builder()
-                    .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
-                    .setAudioFormat(
-                        AudioFormat.Builder()
-                            .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
-                            .setSampleRate(sr)
-                            .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
-                            .build()
-                    )
-                    .setBufferSizeInBytes(minInBuf)
-                    .build()
+                var recorder: AudioRecord? = null
+                try {
+                    val candidate = AudioRecord.Builder()
+                        .setAudioSource(MediaRecorder.AudioSource.VOICE_COMMUNICATION)
+                        .setAudioFormat(
+                            AudioFormat.Builder()
+                                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                .setSampleRate(sr)
+                                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                                .build()
+                        )
+                        .setBufferSizeInBytes(minInBuf)
+                        .build()
+                    if (candidate.state == AudioRecord.STATE_INITIALIZED) {
+                        recorder = candidate
+                    } else {
+                        candidate.release()
+                    }
+                } catch (e: Exception) {
+                    Log.w("NativeAudioBridge", "VOICE_COMMUNICATION audio source failed: ${e.message}")
+                }
 
-                // Enable Hardware Acoustic Echo Canceler (AEC) & Noise Suppressor (NS).
-                // IMPORTANT: Do NOT enable Hardware AutomaticGainControl (AGC), because AGC amplifies
-                // quiet room air/thermal hiss by +25dB into audible white noise on earbuds!
+                // Fallback to standard MIC source if VOICE_COMMUNICATION is not supported by device HAL
+                if (recorder == null) {
+                    recorder = AudioRecord.Builder()
+                        .setAudioSource(MediaRecorder.AudioSource.MIC)
+                        .setAudioFormat(
+                            AudioFormat.Builder()
+                                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                                .setSampleRate(sr)
+                                .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
+                                .build()
+                        )
+                        .setBufferSizeInBytes(minInBuf)
+                        .build()
+                }
+
+                // Enable Hardware Acoustic Echo Canceler (AEC) & Noise Suppressor (NS) if supported
                 val sessionId = recorder.audioSessionId
                 if (AcousticEchoCanceler.isAvailable()) {
-                    aecEffect = AcousticEchoCanceler.create(sessionId)?.apply { enabled = true }
+                    aecEffect = try { AcousticEchoCanceler.create(sessionId)?.apply { enabled = true } } catch (_: Exception) { null }
                 }
                 if (NoiseSuppressor.isAvailable()) {
-                    nsEffect = NoiseSuppressor.create(sessionId)?.apply { enabled = true }
+                    nsEffect = try { NoiseSuppressor.create(sessionId)?.apply { enabled = true } } catch (_: Exception) { null }
                 }
 
                 val track = AudioTrack.Builder()
@@ -329,21 +359,39 @@ class NativeAudioBridge @Inject constructor() {
                 recorder.startRecording()
                 track.play()
 
-                val pcmBuf = ShortArray(frameSamples)
-                while (isActive && isRunning.get()) {
-                    val read = recorder.read(pcmBuf, 0, frameSamples)
-                    if (read > 0) {
-                        processCapturedPcm(pcmBuf, read, sr)
-                    }
-                    val playPcm = rxJitterQueue.pollFirst()
-                    if (playPcm != null) {
-                        applyPlaybackVocalBoostAndSpatialDsp(playPcm)
-                        track.write(playPcm, 0, playPcm.size)
+                // Concurrent Capture & Playback Pipelines to prevent cross-blocking
+                val captureJob = launch(Dispatchers.IO) {
+                    val pcmBuf = ShortArray(frameSamples)
+                    while (isActive && isRunning.get()) {
+                        val read = recorder.read(pcmBuf, 0, frameSamples)
+                        if (read > 0) {
+                            processCapturedPcm(pcmBuf, read, sr)
+                        } else {
+                            kotlinx.coroutines.delay(5L)
+                        }
                     }
                 }
+
+                val playbackJob = launch(Dispatchers.IO) {
+                    while (isActive && isRunning.get()) {
+                        val playPcm = rxJitterQueue.pollFirst()
+                        if (playPcm != null) {
+                            applyPlaybackVocalBoostAndSpatialDsp(playPcm)
+                            track.write(playPcm, 0, playPcm.size)
+                        } else {
+                            kotlinx.coroutines.delay(5L)
+                        }
+                    }
+                }
+
+                captureJob.join()
+                playbackJob.join()
             } catch (e: Exception) {
-                Log.w("NativeAudioBridge", "Hardware audio fallback: ${e.message}")
+                if (e !is CancellationException) {
+                    Log.w("NativeAudioBridge", "Hardware audio fallback: ${e.message}")
+                }
             } finally {
+                isRunning.set(false)
                 releaseHardwareAudio()
             }
         }
@@ -401,23 +449,23 @@ class NativeAudioBridge @Inject constructor() {
         val gateOn = proximityGateEnabled.get()
         // Slowly adapt noise floor downward when quiet, or slightly upward during sustained ambient floor
         if (frameRms < adaptiveNoiseFloorRms * 1.4f) {
-            adaptiveNoiseFloorRms = (0.94f * adaptiveNoiseFloorRms + 0.06f * frameRms).coerceIn(60f, 550f)
+            adaptiveNoiseFloorRms = (0.94f * adaptiveNoiseFloorRms + 0.06f * frameRms).coerceIn(40f, 400f)
         } else {
-            adaptiveNoiseFloorRms = (0.998f * adaptiveNoiseFloorRms + 0.002f * frameRms).coerceIn(60f, 550f)
+            adaptiveNoiseFloorRms = (0.998f * adaptiveNoiseFloorRms + 0.002f * frameRms).coerceIn(40f, 400f)
         }
 
-        // Voice detection threshold sits clearly above the tracked ambient noise floor
-        val openThreshold = if (gateOn) max(340f, adaptiveNoiseFloorRms * 2.4f) else 140f
-        val closeThreshold = if (gateOn) max(240f, adaptiveNoiseFloorRms * 1.7f) else 90f
+        // Voice detection threshold: calibrated for high sensitivity across all Android microphones
+        val openThreshold = if (gateOn) max(100f, adaptiveNoiseFloorRms * 1.35f) else 45f
+        val closeThreshold = if (gateOn) max(70f, adaptiveNoiseFloorRms * 1.15f) else 30f
 
-        val voiceDetectedInFrame = if (gateEnvelopeGain > 0.3f) {
+        val voiceDetectedInFrame = if (gateEnvelopeGain > 0.25f) {
             frameRms >= closeThreshold
         } else {
             frameRms >= openThreshold
         }
 
         if (voiceDetectedInFrame) {
-            gateHoldFrames = 6 // Hold gate open for ~120ms after speech syllables so words never clip
+            gateHoldFrames = 12 // Hold gate open for ~240ms after speech syllables so words never clip
         } else if (gateHoldFrames > 0) {
             gateHoldFrames--
         }
@@ -425,15 +473,15 @@ class NativeAudioBridge @Inject constructor() {
         val shouldKeepGateOpen = voiceDetectedInFrame || gateHoldFrames > 0 || !gateOn
 
         // Smooth per-sample attack/release coefficients prevent clicking while muting white noise to 0.0
-        val attackCoeff = 0.06f   // Fast ~3ms opening on vocal onset
-        val releaseCoeff = 0.004f // Smooth decay to pure silence
+        val attackCoeff = 0.08f   // Fast ~2.5ms opening on vocal onset
+        val releaseCoeff = 0.003f // Smooth decay to silence
 
         var postDspEnergySum = 0.0
         for (i in 0 until count) {
             val targetGain = if (shouldKeepGateOpen) {
                 1.0f
             } else {
-                // When Noise Gate is ON and user is not speaking: 0.0f = pure silence (zero white noise!)
+                // Attenuate ambient silence to eliminate background white noise
                 0.0f
             }
             val stepCoeff = if (targetGain > gateEnvelopeGain) attackCoeff else releaseCoeff
@@ -461,12 +509,13 @@ class NativeAudioBridge @Inject constructor() {
         val postRms = if (count > 0) sqrt(postDspEnergySum / count) else 0.0
         val db = if (postRms > 1.0) (20.0 * log10(postRms / 32768.0)).toFloat() else -60f
         currentDbFs = db.coerceIn(-60f, 0f)
-        vadActive = shouldKeepGateOpen && currentDbFs > -45f
+        vadActive = (shouldKeepGateOpen && currentDbFs > -54f) || (!gateOn && currentDbFs > -58f)
 
         updateSpectrum(pcm, count)
 
-        // Only enqueue & transmit audio frames when voice is active (or during loopback)
-        if (vadActive || isPttPressed.get() || loopbackEnabled.get()) {
+        // Only enqueue & transmit audio frames when voice is active (or during PTT / loopback / gate disabled)
+        val shouldTransmit = vadActive || isPttPressed.get() || loopbackEnabled.get() || (!gateOn && !isPttMode.get())
+        if (shouldTransmit) {
             val encoded = encodePcmFrame(pcm, count)
             if (txFrameQueue.size > 16) txFrameQueue.pollFirst()
             txFrameQueue.addLast(encoded)
@@ -577,19 +626,38 @@ class NativeAudioBridge @Inject constructor() {
         }
     }
 
+    @Synchronized
     private fun releaseHardwareAudio() {
         try { aecEffect?.release() } catch (_: Exception) {}
         try { nsEffect?.release() } catch (_: Exception) {}
-        try {
-            audioRecord?.stop()
-            audioRecord?.release()
-        } catch (_: Exception) {}
-        try {
-            audioTrack?.stop()
-            audioTrack?.release()
-        } catch (_: Exception) {}
+        aecEffect = null
+        nsEffect = null
+
+        val rec = audioRecord
         audioRecord = null
+        if (rec != null) {
+            try {
+                if (rec.recordingState == AudioRecord.RECORDSTATE_RECORDING) {
+                    rec.stop()
+                }
+            } catch (_: Exception) {}
+            try {
+                rec.release()
+            } catch (_: Exception) {}
+        }
+
+        val trk = audioTrack
         audioTrack = null
+        if (trk != null) {
+            try {
+                if (trk.playState == AudioTrack.PLAYSTATE_PLAYING) {
+                    trk.stop()
+                }
+            } catch (_: Exception) {}
+            try {
+                trk.release()
+            } catch (_: Exception) {}
+        }
     }
 
     private external fun nativeStartEngine(sampleRate: Int, frameSizeMs: Int): Boolean

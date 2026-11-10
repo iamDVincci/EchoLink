@@ -133,6 +133,32 @@ class EchoLinkViewModel @Inject constructor(
         EchoLinkIntercomService.onDisconnectCallback = {
             disconnectActiveSession()
         }
+        transportEngine.onPeerLeftCallback = { peerIp ->
+            viewModelScope.launch {
+                val remaining = transportEngine.activePeers.value
+                val peerName = transportEngine.resolvePeerName(peerIp, "Peer")
+                if (remaining.isEmpty()) {
+                    disconnectActiveSession()
+                    _toastBannerMessage.value = Pair(
+                        "$peerName Left Session",
+                        "All peers disconnected. Returned to Radar."
+                    )
+                    delay(3500L)
+                    if (_toastBannerMessage.value?.first?.contains("Left Session") == true) {
+                        _toastBannerMessage.value = null
+                    }
+                } else {
+                    _toastBannerMessage.value = Pair(
+                        "$peerName Left Room",
+                        "Remaining active peers: ${remaining.size}"
+                    )
+                    delay(3000L)
+                    if (_toastBannerMessage.value?.first?.contains("Left Room") == true) {
+                        _toastBannerMessage.value = null
+                    }
+                }
+            }
+        }
         transportEngine.onRemotePeerJoinedCallback = { joinedPeer ->
             viewModelScope.launch {
                 saveRecentPeer(joinedPeer)
@@ -166,6 +192,7 @@ class EchoLinkViewModel @Inject constructor(
                         _toastBannerMessage.value = null
                     }
                 } else {
+                    disconnectActiveSession()
                     _toastBannerMessage.value = Pair(
                         "Linking Failed with $peerName",
                         "Could not reach $peerIp on port 51110. Ensure both devices are on same Wi-Fi/Hotspot."
@@ -604,29 +631,38 @@ class EchoLinkViewModel @Inject constructor(
         }
     }
 
+    private val isDisconnecting = java.util.concurrent.atomic.AtomicBoolean(false)
+
     fun disconnectActiveSession() {
-        _isInActiveVoiceSession.value = false
-        _isPttTransmitting.value = false
-        if (!_loopbackTestActive.value) {
-            audioBridge.stopEngine()
-        }
-        transportEngine.disconnectAll()
-        _toastBannerMessage.value = Pair(
-            "Session Disconnected",
-            "Returned to Radar Scanning"
-        )
-        viewModelScope.launch {
-            delay(2500L)
-            if (_toastBannerMessage.value?.first == "Session Disconnected") {
-                _toastBannerMessage.value = null
-            }
-        }
+        if (isDisconnecting.getAndSet(true)) return
         try {
-            val stopIntent = Intent(appContext, EchoLinkIntercomService::class.java).apply {
-                action = EchoLinkIntercomService.ACTION_DISCONNECT
+            _isInActiveVoiceSession.value = false
+            _isPttTransmitting.value = false
+            if (!_loopbackTestActive.value) {
+                audioBridge.stopEngine()
             }
-            appContext.startService(stopIntent)
-        } catch (_: Exception) {
+            earbudRoutingManager.resetAudioRoute()
+            transportEngine.disconnectAll()
+            _toastBannerMessage.value = Pair(
+                "Session Disconnected",
+                "Returned to Radar Scanning"
+            )
+            viewModelScope.launch {
+                delay(2500L)
+                if (_toastBannerMessage.value?.first == "Session Disconnected") {
+                    _toastBannerMessage.value = null
+                }
+            }
+            try {
+                val stopIntent = Intent(appContext, EchoLinkIntercomService::class.java).apply {
+                    action = EchoLinkIntercomService.ACTION_DISCONNECT
+                    putExtra("EXTRA_FROM_VM", true)
+                }
+                appContext.startService(stopIntent)
+            } catch (_: Exception) {
+            }
+        } finally {
+            isDisconnecting.set(false)
         }
     }
 
@@ -643,19 +679,24 @@ class EchoLinkViewModel @Inject constructor(
         }
     }
 
+    private val idleSpectrumBands = List(14) { 0.12f }
+
     private fun startLiveTelemetryAndSpectrumLoop() {
         viewModelScope.launch {
             while (isActive) {
-                delay(90L)
                 if (_isInActiveVoiceSession.value || _loopbackTestActive.value) {
+                    delay(90L)
                     val nativeBands = audioBridge.getSpectrumBands()
                     _liveSpectrumBands.value = List(14) { idx ->
                         nativeBands.getOrElse(idx) { 0.12f }.coerceIn(0.12f, 1.0f)
                     }
                     _liveVoiceDbFs.value = audioBridge.getCurrentDbFs().roundToInt().coerceIn(-60, 0)
                 } else {
-                    _liveSpectrumBands.value = List(14) { 0.12f }
-                    _liveVoiceDbFs.value = -60
+                    if (_liveVoiceDbFs.value != -60) {
+                        _liveSpectrumBands.value = idleSpectrumBands
+                        _liveVoiceDbFs.value = -60
+                    }
+                    delay(400L)
                 }
             }
         }

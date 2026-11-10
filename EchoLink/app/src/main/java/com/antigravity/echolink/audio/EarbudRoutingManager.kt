@@ -170,6 +170,25 @@ class EarbudRoutingManager @Inject constructor(
         }
     }
 
+    fun resetAudioRoute() {
+        try {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+                audioManager.clearCommunicationDevice()
+            } else {
+                @Suppress("DEPRECATION")
+                if (audioManager.isBluetoothScoOn) {
+                    audioManager.isBluetoothScoOn = false
+                    audioManager.stopBluetoothSco()
+                }
+                @Suppress("DEPRECATION")
+                audioManager.isSpeakerphoneOn = false
+            }
+            audioManager.mode = AudioManager.MODE_NORMAL
+        } catch (_: Exception) {
+        }
+        refreshConnectedAudioDevices()
+    }
+
     fun selectAudioRoute(routeLabel: String) {
         val current = _earbudStatus.value
         try {

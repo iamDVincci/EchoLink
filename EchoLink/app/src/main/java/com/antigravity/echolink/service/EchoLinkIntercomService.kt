@@ -59,7 +59,10 @@ class EchoLinkIntercomService : Service() {
                 updateNotification()
             }
             ACTION_DISCONNECT -> {
-                onDisconnectCallback?.invoke()
+                val fromNotification = intent?.getBooleanExtra("EXTRA_FROM_NOTIFICATION", false) ?: false
+                if (fromNotification) {
+                    onDisconnectCallback?.invoke()
+                }
                 stopForeground(STOP_FOREGROUND_REMOVE)
                 stopSelf()
                 return START_NOT_STICKY
@@ -124,6 +127,7 @@ class EchoLinkIntercomService : Service() {
 
         val disconnectIntent = Intent(this, EchoLinkIntercomService::class.java).apply {
             action = ACTION_DISCONNECT
+            putExtra("EXTRA_FROM_NOTIFICATION", true)
         }
         val disconnectPending = PendingIntent.getService(
             this,

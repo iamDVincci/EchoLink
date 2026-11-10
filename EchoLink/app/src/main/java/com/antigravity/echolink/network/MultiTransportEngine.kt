@@ -104,9 +104,12 @@ class MultiTransportEngine @Inject constructor(
     private val customPeerNames = ConcurrentHashMap<String, String>()
     private val txSeqCounter = AtomicInteger(0)
     private var receiverRegistered = false
+    private val localInstanceId = java.util.UUID.randomUUID().toString().take(8)
 
     var onRemotePeerJoinedCallback: ((PeerNode) -> Unit)? = null
+    var onPeerLeftCallback: ((String) -> Unit)? = null
     var onHandshakeStatusCallback: ((Boolean, String, String?, Int) -> Unit)? = null
+    private val peerPingFailures = ConcurrentHashMap<String, Int>()
 
     private var controlServerJob: Job? = null
     private var voiceUdpJob: Job? = null
@@ -327,14 +330,33 @@ class MultiTransportEngine @Inject constructor(
     }
 
     fun disconnectAll() {
+        val peersToNotify = connectedPeerAddresses.keys.toList()
+        if (peersToNotify.isNotEmpty()) {
+            scope.launch(Dispatchers.IO) {
+                for (peerIp in peersToNotify) {
+                    try {
+                        Socket().use { s ->
+                            s.soTimeout = 800
+                            s.connect(InetSocketAddress(peerIp, CONTROL_PORT), 800)
+                            val w = PrintWriter(s.getOutputStream(), true)
+                            w.println("ECHOLINK_BYE:$localInstanceId")
+                        }
+                    } catch (_: Exception) {
+                    }
+                }
+            }
+        }
         voiceUdpJob?.cancel()
+        voiceUdpJob = null
         heartbeatJob?.cancel()
+        heartbeatJob = null
         try {
             voiceSocket?.close()
         } catch (_: Exception) {
         }
         voiceSocket = null
         connectedPeerAddresses.clear()
+        peerPingFailures.clear()
         _activePeers.value = emptyList()
         _talkTargetPeerIp.value = null
         _packetTelemetry.value = _packetTelemetry.value.copy(
@@ -346,16 +368,25 @@ class MultiTransportEngine @Inject constructor(
 
     private fun startControlChannelServer() {
         if (controlServerJob?.isActive == true) return
-        controlServerJob = scope.launch {
-            try {
-                ServerSocket(CONTROL_PORT).use { server ->
-                    while (isActive) {
-                        val client = server.accept()
-                        launch { handleControlClient(client) }
+        controlServerJob = scope.launch(Dispatchers.IO) {
+            while (isActive) {
+                try {
+                    val server = ServerSocket().apply {
+                        reuseAddress = true
+                        bind(InetSocketAddress(CONTROL_PORT))
                     }
+                    server.use { s ->
+                        Log.d("MultiTransportEngine", "Control server listening on port $CONTROL_PORT")
+                        while (isActive) {
+                            val client = s.accept()
+                            launch { handleControlClient(client) }
+                        }
+                    }
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    Log.w("MultiTransportEngine", "Control server error on port $CONTROL_PORT: ${e.message}")
+                    delay(1000)
                 }
-            } catch (e: Exception) {
-                Log.w("MultiTransportEngine", "Control port $CONTROL_PORT status: ${e.message}")
             }
         }
     }
@@ -387,9 +418,22 @@ class MultiTransportEngine @Inject constructor(
                 startKeepAliveHeartbeats()
                 onRemotePeerJoinedCallback?.invoke(node)
                 writer.println("ECHOLINK_ACK:${crypto.getPublicKeyHex()}:${crypto.sessionPin}:${Build.MODEL}")
+            } else if (line.startsWith("ECHOLINK_BYE:")) {
+                connectedPeerAddresses.remove(peerIp)
+                peerPingFailures.remove(peerIp)
+                val remaining = _activePeers.value.filterNot { it.ipAddress == peerIp }
+                _activePeers.value = remaining
+                if (_talkTargetPeerIp.value == peerIp) {
+                    _talkTargetPeerIp.value = null
+                }
+                onPeerLeftCallback?.invoke(peerIp)
             } else if (line.startsWith("PING:")) {
-                val sentTs = line.substringAfter("PING:")
-                writer.println("PONG:$sentTs")
+                if (connectedPeerAddresses.containsKey(peerIp)) {
+                    val sentTs = line.substringAfter("PING:")
+                    writer.println("PONG:$sentTs")
+                } else {
+                    writer.println("PONG_NOT_CONNECTED")
+                }
             }
         } catch (_: Exception) {
         } finally {
@@ -439,8 +483,9 @@ class MultiTransportEngine @Inject constructor(
     }
 
     private fun startVoiceUdpStreaming() {
-        if (voiceUdpJob?.isActive == true) return
-        voiceUdpJob = scope.launch {
+        if (voiceUdpJob?.isActive == true && voiceSocket != null && !voiceSocket!!.isClosed) return
+        voiceUdpJob?.cancel()
+        voiceUdpJob = scope.launch(Dispatchers.IO) {
             try {
                 val sock = DatagramSocket(null).apply {
                     reuseAddress = true
@@ -563,7 +608,7 @@ class MultiTransportEngine @Inject constructor(
      */
     private fun startKeepAliveHeartbeats() {
         heartbeatJob?.cancel()
-        heartbeatJob = scope.launch {
+        heartbeatJob = scope.launch(Dispatchers.IO) {
             while (isActive) {
                 delay(2000L)
                 refreshHardwareWifiTelemetry()
@@ -572,7 +617,22 @@ class MultiTransportEngine @Inject constructor(
                     val peerIp = targetEntry.key
                     val measuredPing = measureTcpPingMs(peerIp)
                     if (measuredPing != null) {
+                        peerPingFailures[peerIp] = 0
                         _packetTelemetry.value = _packetTelemetry.value.copy(pingMs = measuredPing)
+                    } else {
+                        val fails = (peerPingFailures[peerIp] ?: 0) + 1
+                        peerPingFailures[peerIp] = fails
+                        if (fails >= 3) {
+                            Log.w("MultiTransportEngine", "Peer $peerIp timed out after 3 ping failures")
+                            peerPingFailures.remove(peerIp)
+                            connectedPeerAddresses.remove(peerIp)
+                            val remaining = _activePeers.value.filterNot { it.ipAddress == peerIp }
+                            _activePeers.value = remaining
+                            if (_talkTargetPeerIp.value == peerIp) {
+                                _talkTargetPeerIp.value = null
+                            }
+                            onPeerLeftCallback?.invoke(peerIp)
+                        }
                     }
                 }
             }
@@ -590,7 +650,7 @@ class MultiTransportEngine @Inject constructor(
                 val reader = BufferedReader(InputStreamReader(sock.getInputStream()))
                 writer.println("PING:$t0")
                 val line = reader.readLine()
-                if (line != null && line.startsWith("PONG:")) {
+                if (line != null && line.startsWith("PONG:") && !line.startsWith("PONG_NOT_CONNECTED")) {
                     (System.currentTimeMillis() - t0).toInt().coerceAtLeast(1)
                 } else {
                     null
@@ -621,7 +681,7 @@ class MultiTransportEngine @Inject constructor(
                             try {
                                 val localIp = getLocalIpAddress()
                                 _callLinkSession.value = _callLinkSession.value.copy(hostIp = localIp)
-                                val beaconMsg = "ECHOLINK_BEACON:${Build.MODEL}:$localIp:${crypto.sessionPin}".toByteArray()
+                                val beaconMsg = "ECHOLINK_BEACON:${Build.MODEL}:$localIp:${crypto.sessionPin}:$localInstanceId".toByteArray()
                                 val broadcastTargets = getBroadcastAddresses()
                                 for (target in broadcastTargets) {
                                     try {
@@ -647,8 +707,20 @@ class MultiTransportEngine @Inject constructor(
                                 val peerModel = parts.getOrNull(1) ?: "EchoLink Peer"
                                 val declaredIp = parts.getOrNull(2) ?: ""
                                 val peerPin = parts.getOrNull(3) ?: "0000"
+                                val remoteInstanceId = parts.getOrNull(4) ?: ""
+
+                                // Never discover ourselves across any local interface or socket reflection
+                                if (remoteInstanceId == localInstanceId) {
+                                    continue
+                                }
+
                                 val senderIp = pkt.address.hostAddress ?: ""
                                 val myIp = getLocalIpAddress()
+                                val allMyIps = getAllLocalIpAddresses()
+
+                                if (allMyIps.contains(senderIp) || allMyIps.contains(declaredIp)) {
+                                    continue
+                                }
 
                                 // Physical packet source IP takes priority if declared IP is empty, loopback, or carrier CGNAT
                                 val effectivePeerIp = when {
@@ -657,7 +729,7 @@ class MultiTransportEngine @Inject constructor(
                                     else -> senderIp
                                 }
 
-                                if (effectivePeerIp.isNotBlank() && effectivePeerIp != myIp && effectivePeerIp != "127.0.0.1") {
+                                if (effectivePeerIp.isNotBlank() && effectivePeerIp != myIp && effectivePeerIp != "127.0.0.1" && !allMyIps.contains(effectivePeerIp)) {
                                     upsertDiscoveredLanPeer(peerModel, effectivePeerIp, peerPin)
                                 }
                             }
@@ -911,5 +983,25 @@ class MultiTransportEngine @Inject constructor(
         } catch (_: Exception) {
         }
         return list.distinct()
+    }
+
+    fun getAllLocalIpAddresses(): Set<String> {
+        val ips = mutableSetOf<String>()
+        try {
+            val interfaces = NetworkInterface.getNetworkInterfaces() ?: return emptySet()
+            while (interfaces.hasMoreElements()) {
+                val intf = interfaces.nextElement()
+                if (!intf.isUp || intf.isLoopback) continue
+                val addrs = intf.inetAddresses
+                while (addrs.hasMoreElements()) {
+                    val addr = addrs.nextElement()
+                    if (addr is Inet4Address && !addr.isLoopbackAddress) {
+                        addr.hostAddress?.let { ips.add(it) }
+                    }
+                }
+            }
+        } catch (_: Exception) {
+        }
+        return ips
     }
 }
