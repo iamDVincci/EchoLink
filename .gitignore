@@ -10,6 +10,8 @@
 *.dex
 
 # IDE & OS Files
+.kotlin/
+**/.kotlin/
 .idea/
 *.iml
 .DS_Store

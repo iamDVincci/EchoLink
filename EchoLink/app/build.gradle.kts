@@ -41,9 +41,21 @@ android {
         }
     }
 
+    signingConfigs {
+        create("release") {
+            storeFile = file("echolink-release.jks")
+            storePassword = "echolink123"
+            keyAlias = "echolink"
+            keyPassword = "echolink123"
+            enableV1Signing = true
+            enableV2Signing = true
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
